@@ -1,7 +1,7 @@
-import type { NextPage } from "next";
-import Head from "next/head";
+import type { NextPage } from 'next';
+import Head from 'next/head';
 
-import styles from "../styles/Home.module.scss";
+import styles from '../styles/Home.module.scss';
 
 const Home: NextPage = () => {
   return (
@@ -22,28 +22,9 @@ const Home: NextPage = () => {
 
         <section id="about-me" className={styles.about}>
           <div className={styles.center}>
-            I'm a software engineer, and I like to work on the borders of
-            things.
+            I'm a software engineer, and I like to work between domains. The
+            most interesting problems
           </div>
-          <div className={styles.center}>
-            That's where the most interesting things happen.
-          </div>
-          <div className={styles.center}>
-            I like controlling the real world from the virtual world (Level99)
-          </div>
-          <div className={styles.center}>
-            Or the virtual world from the real world (ChoreoV)
-          </div>
-          <div className={styles.center}>
-            I like making hybrid things (bionic leg)
-          </div>
-          <div className={styles.center}>
-            and nerdy linguistic things (rhyme detector)
-          </div>
-          <div className={styles.center}>
-            and things that connect people with different interests (KiC)
-          </div>
-          <div className={styles.center}>More detail to come!</div>
         </section>
       </main>
 
