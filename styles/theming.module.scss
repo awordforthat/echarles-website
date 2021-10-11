@@ -1,0 +1,27 @@
+$theme-green: rgb(128, 190, 46);
+$theme-blue: rgb(7, 133, 101);
+
+.link {
+    font-weight: bolder;
+    position: relative;
+    background: linear-gradient("#ffff00", $theme-green);
+
+    &::after {
+        content: '';
+        position: absolute;
+        width: 0%;
+        height: 3px;
+        left: 0px; 
+        bottom: 2px;
+        border-radius: 4px;
+        background: linear-gradient(90deg, $theme-blue, $theme-green);
+
+        transition: width 0.2s;
+    }
+
+    &:hover::after {
+        width: 100%;
+    }
+   
+}
+

@@ -1,6 +1,11 @@
+// framework
 import type { NextPage } from 'next';
 import Head from 'next/head';
 
+// components
+import { Link as ThemedLink } from '../ui/link';
+
+// styles
 import styles from '../styles/Home.module.scss';
 
 const Home: NextPage = () => {
@@ -22,11 +27,17 @@ const Home: NextPage = () => {
 
         <section id="about-me" className={styles.about}>
           <h2>About Me</h2>
-          <div className={styles.center}>
-            I'm a software engineer, and I like working at the borders of
-            things. I've worked on projects that merge speech and software,
-            physiotherapy and costume design, the physical world and the virtual
-            world, and more.
+          <div>
+            I'm a software engineer, and I love working on projects that merge
+            the physical world and the virtual world. Currently I work at{' '}
+            <ThemedLink text={'Box Fort'} target={'http://www.boxfort.com'} />,
+            where I was part of the dev team that built{' '}
+            <ThemedLink text={'Level99'} target={'http://www.level99.com'} />, a
+            new live-action video game concept that I adore.
+          </div>
+          <div>
+            In the past, I've worked on many museum interactives (maybe some
+            you've seen!).
           </div>
           <div>
             I enjoy sharing knowledge, and I'm dedicated to creating and
@@ -42,9 +53,25 @@ const Home: NextPage = () => {
           to learn Next.JS, very exciting.) Please forgive any rough edges!
         </div>
         <ul>
-          <li>Email me</li>
-          <li>Resume (PDF)</li>
-          <li>Woodworking</li>
+          <li>
+            <ThemedLink
+              text="Contact"
+              target="mailto:hello@emilywcharles.com"
+            />
+          </li>
+          <li>
+            <ThemedLink
+              text="Resume"
+              target="/ECharlesResume.pdf"
+              download={true}
+            />
+          </li>
+          <li>
+            <ThemedLink
+              text="Woodworking"
+              target="https://www.etsy.com/shop/birdsongwoodwork"
+            />
+          </li>
         </ul>
       </footer>
     </div>

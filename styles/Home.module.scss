@@ -29,6 +29,14 @@
     font-size: 0.7em;
     font-variant: small-caps;
   }
+
+  ul {
+    list-style-type: none;
+    a {
+
+      display: unset;
+    }
+  }
 }
 
 .footer a {
