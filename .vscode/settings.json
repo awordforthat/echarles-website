@@ -2,7 +2,7 @@
   "eslint.alwaysShowStatus": true,
   "eslint.format.enable": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll": true,
   },
   "editor.formatOnSave":true, 
   "eslint.validate": [
@@ -16,6 +16,10 @@
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "editor.formatOnSave":true,
 },
-"eslint.trace.server": null,
+"eslint.trace.server": "verbose",
 "prettier.configPath": ".prettierrc",
+"stylelint.enable": true,
+"css.validate": false,
+"less.validate": false,
+"scss.validate": false
 }
