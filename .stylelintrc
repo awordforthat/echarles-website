@@ -8,7 +8,7 @@
         "scss/at-else-empty-line-before": "never",
         "scss/at-if-closing-brace-newline-after": "always-last-in-chain",
         "scss/at-if-closing-brace-space-after": "always-intermediate",
-        "indentation": 4,
+        "indentation": 2,
         "string-quotes": "double",
         "no-duplicate-selectors": true,
         "color-hex-length": "long",

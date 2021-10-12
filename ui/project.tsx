@@ -2,15 +2,12 @@
 import * as React from 'react';
 import Image from 'next/image';
 
-// components
-import { Link } from './link';
-
 // css
 import project from '../styles/project.module.scss';
 import { IProject } from '../pages/api/project';
 
 interface IProjectProps extends IProject {
-  theme: 'dark' | 'light';
+  theme?: 'dark' | 'light';
 }
 
 export function Project({
@@ -19,11 +16,16 @@ export function Project({
   description,
   link,
   technologies,
+  theme,
 }: IProjectProps) {
   return (
-    <div className={`${project.project} ${project.dark}`}>
+    <a
+      href={link}
+      className={`${project.project} ${theme == 'dark' ? project.dark : ''}`}
+    >
       <Image
         src={image}
+        layout="responsive"
         className={project.thumbnail}
         width={400}
         height={300}
@@ -34,9 +36,7 @@ export function Project({
       <div className={project.contents}>
         {description}
         <div className={project.footer}>
-          <div className={project.more}>
-            <Link target={link} text={'see more'} />
-          </div>
+          <div className={project.more}></div>
           <div className={project.technologies}>
             {technologies.map((tech, index) => {
               return (
@@ -51,8 +51,6 @@ export function Project({
           </div>
         </div>
       </div>
-
-      <Link text="learn more" target={link} download={false} />
-    </div>
+    </a>
   );
 }

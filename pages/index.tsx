@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 
 // components
-import { Link as ThemedLink } from '../ui/link';
+import { Link } from '../ui/link';
 import { Project } from '../ui/project';
 
 // config
@@ -12,6 +12,7 @@ import { projects } from '../content';
 // styles
 import styles from '../styles/Home.module.scss';
 import theming from '../styles/theming.module.scss';
+import { IProject } from './api/project';
 
 const Home: NextPage = () => {
   return (
@@ -52,19 +53,45 @@ const Home: NextPage = () => {
         <section id="featured-projects">
           <h2>Featured Projects</h2>
           <h3>Professional</h3>
-          <Project {...projects.level99} theme={'dark'} />
+          <div className={styles.projects}>
+            {Object.entries(projects)
+              // eslint-disable-next-line no-unused-vars
+              .filter(([key, project]: [string, IProject]) => {
+                return !project.personal;
+              })
+              // eslint-disable-next-line no-unused-vars
+              .map(([key, project]: [string, IProject]) => {
+                return (
+                  <Project
+                    key={project.title.replace(' ', '')}
+                    {...project}
+                    theme={'dark'}
+                  />
+                );
+              })}
+          </div>
           <div className={theming.separator} />
-          <div>Pedestrian tracker</div>
-          <div>L99 sim</div>
-          <div>ChoreoV??</div>
-
           <h3>Personal</h3>
-          <div>Desktop doorbell</div>
-          <div>Knowledge in Common</div>
-          <div>Bionic Leg</div>
+          <div className={styles.projects}>
+            {Object.entries(projects)
+              // eslint-disable-next-line no-unused-vars
+              .filter(([key, project]: [string, IProject]) => {
+                return project.personal;
+              })
+              // eslint-disable-next-line no-unused-vars
+              .map(([key, project]: [string, IProject]) => {
+                return (
+                  <Project
+                    key={project.title.replace(' ', '')}
+                    {...project}
+                    theme={'dark'}
+                  />
+                );
+              })}
+          </div>
         </section>
 
-        <section id="skills">
+        {/* <section id="skills">
           <h2>Skills</h2>
         </section>
         <section>
@@ -73,30 +100,25 @@ const Home: NextPage = () => {
         </section>
         <section id="life">
           <h2>Other Interests</h2>
-          <div>Occasionally I do things that are not code...</div>
+          <div>Occasionally I do things that are not code</div>
           <div>Woodworking</div>
           <div>Parkour</div>
-        </section>
+        </section> */}
       </main>
 
       <footer className={styles.footer}>
-        <div id="construction" className={styles.center}>
-          This site is perpetually under construction. (I'm currently using it
-          to learn Next.JS, very exciting.) Please forgive any rough edges!
+        <div id="construction">
+          <div>
+            This site is a bit of a sandbox. Please forgive any rough edges!
+          </div>
+          <div className="exclamation">!</div>
         </div>
         <ul>
           <li>
-            <ThemedLink
-              text="Contact"
-              target="mailto:hello@emilywcharles.com"
-            />
+            <Link text="Contact" target="mailto:hello@emilywcharles.com" />
           </li>
           <li>
-            <ThemedLink
-              text="Resume"
-              target="/ECharlesResume.pdf"
-              download={true}
-            />
+            <Link text="Resume" target="/ECharlesResume.pdf" download={true} />
           </li>
         </ul>
       </footer>

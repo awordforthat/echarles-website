@@ -1,32 +1,32 @@
 @import "palette.scss";
 
 .link                                            {
-    background: linear-gradient("#ffff00", $theme-green);
-    font-weight: bolder;
-    position: relative;
+  background: linear-gradient("#ffff00", $theme-green);
+  font-weight: bolder;
+  position: relative;
 
-    &::after {
-        background: linear-gradient(90deg, $theme-teal, $theme-green);
-        border-radius: 4px; 
-        bottom: 2px;
-        content: "";
-        height: 3px;
-        left: 0px;
-        position: absolute;
+  &::after {
+    background: linear-gradient(90deg, $theme-teal, $theme-green);
+    border-radius: 4px; 
+    bottom: 2px;
+    content: "";
+    height: 3px;
+    left: 0px;
+    position: absolute;
 
-        transition: width 0.2s;
-        width: 0%;
-    }
+    transition: width 0.2s;
+    width: 0%;
+  }
 
-    &:hover::after {
-        width: 100%;
-    }
+  &:hover::after {
+    width: 100%;
+  }
    
 }
 
 .separator {
-    background: radial-gradient(rgba($theme-gray, 0.7) 0%, transparent 80%);
-    border-radius: 5px;
-    height: 2px;
-    width: 100%;
+  background: radial-gradient(rgba($theme-gray, 0.7) 0%, transparent 80%);
+  border-radius: 5px;
+  height: 2px;
+  width: 100%;
 }

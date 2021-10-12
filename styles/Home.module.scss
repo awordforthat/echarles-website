@@ -1,95 +1,102 @@
 .container {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 0 0.5rem;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 0 2rem;
 }
 
 .main {
-    align-items: center;
-    display: flex;
-    flex: 1; 
-    flex-direction: column;
-    justify-content: center;
-    padding: 5rem 0;
+  align-items: center;
+  display: flex;
+  flex: 1; 
+  flex-direction: column;
+  justify-content: center;
+  padding: 5rem 0;
  
 }
 
+.projects {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
 .title a {
-    color: #0070f3;
-    text-decoration: none;
+  color: #0070f3;
+  text-decoration: none;
 }
 
 .footer {
-    align-items: center;
-    border-top: 1px solid #eaeaea;
-    display: flex;
-    flex-direction: column;
-    height: 100px;
-    justify-content: center;
-    width: 100%;
+  align-items: center;
+  border-top: 1px solid #eaeaea;
+  display: flex;
+  flex-direction: column;
+  height: 100px;
+  justify-content: center;
+  padding: unset;
+  position: relative;
+  width: 100vw;
 
-    div {
-        font-size: 0.7em;
-        font-variant: small-caps;
-    }
+ 
   
+  a {
+    align-items: center;
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+  }
+
+  ul {
+    list-style-type: none;
+
     a {
-        align-items: center;
-        display: flex;
-        flex-grow: 1;
-        justify-content: center;
+
+      display: unset;
     }
-
-    ul {
-        list-style-type: none;
-
-        a {
-
-            display: unset;
-        }
-    }
+  }
 }
 
 .title a:hover,
 .title a:focus,
 .title a:active {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .title {
-    font-size: 3rem;
-    line-height: 1.15;
-    margin: 0;
+  font-size: 3rem;
+  line-height: 1.15;
+  margin: 0;
 }
 
 .title,
 .description, .subtitle {
-    text-align: center;
+  text-align: center;
 }
 
 .subtitle {
-    font-size: 1rem;
-    font-weight: lighter;
+  font-size: 1rem;
+  font-weight: lighter;
 }
 
 .description {
-    font-size: 1.5rem;
-    line-height: 1.5;
+  font-size: 1.5rem;
+  line-height: 1.5;
 }
 
 .center {
-    align-items: center;
-    display: flex;
-    justify-content: center;
+  align-items: center;
+  display: flex;
+  justify-content: center;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
 
-    .grid {
-        flex-direction: column;
-        width: 100%;
-    }
+  .projects {
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+  }
+    
 }
