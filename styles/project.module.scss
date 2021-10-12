@@ -1,0 +1,104 @@
+@import "./palette";
+
+$description-overlap: 100px;
+
+.project {
+    filter: drop-shadow(0px 0px 30px rgba($theme-dark-gray, 0.2));
+    overflow: hidden;
+    position: relative;
+    width: 300px;
+
+    .title {
+        background: $theme-teal;
+        color: $theme-dark-gray;
+        font-size: 1.5em;
+        mix-blend-mode: multiply;
+        padding-left: 1em;
+        padding-right: 1em;
+        position: absolute;
+        text-align: center;
+        top: 40px;
+        width: fit-content;
+
+        &::after{
+            background: inherit;
+            border-radius: 0% 99% 90% 0% / 45% 28% 81% 10%; // not sure I like this blobby shape - change?
+            content: "";
+            height: 100%;
+            position: absolute;
+            right: -20%;
+            top: 0px;
+            width: 20%;
+        }
+    }
+
+    .thumbnail {
+        border-radius: 20px 20px 0px 0px;
+        padding-left: 5%;
+    }
+
+    .contents {
+        background: linear-gradient(transparent, $theme-teal);
+        border-radius: 0px 0px 5px 5px;
+        padding: 20% 7% 5% 7%;
+        position: relative;
+        top: -$description-overlap;
+
+        .footer {
+
+            .technologies {
+                bottom: 0px;
+                color: white;
+                display: flex;
+                height: fit-content;
+                justify-content: space-between;
+                left: 0px;
+                margin-top: 10%;
+                width: 100%;
+    
+                .technology {
+                    background: black;
+                    border-radius: 5px;
+                    color: white;
+                    padding: 2px 5px 2px 5px;
+                }
+            }
+
+            .more {
+                display: flex;
+                justify-content: flex-end;
+                width: 100%;
+
+                a {
+                    background: $theme-blue;
+                    border-radius: 5px;
+                    padding: 5px;
+                    width: fit-content;
+                }
+                
+            }
+        }
+
+      
+    }
+
+  
+
+    &.dark {
+        color: white;
+
+        .title {
+            color: white;
+            mix-blend-mode: screen;
+        }
+
+        .contents {
+            background: linear-gradient(transparent, rgba($theme-dark-gray, 1) 
+            $description-overlap/2, $theme-dark-gray 1.5*$description-overlap,
+            $theme-dark-gray);
+            color: white;
+
+        }
+    }
+    
+}

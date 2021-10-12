@@ -1,13 +1,12 @@
-$theme-green: rgb(128, 190, 46);
-$theme-blue: rgb(7, 133, 101);
+@import "palette.scss";
 
-.link {
+.link                                            {
     background: linear-gradient("#ffff00", $theme-green);
     font-weight: bolder;
     position: relative;
 
     &::after {
-        background: linear-gradient(90deg, $theme-blue, $theme-green);
+        background: linear-gradient(90deg, $theme-teal, $theme-green);
         border-radius: 4px; 
         bottom: 2px;
         content: "";
@@ -25,3 +24,9 @@ $theme-blue: rgb(7, 133, 101);
    
 }
 
+.separator {
+    background: radial-gradient(rgba($theme-gray, 0.7) 0%, transparent 80%);
+    border-radius: 5px;
+    height: 2px;
+    width: 100%;
+}
