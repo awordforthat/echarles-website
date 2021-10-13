@@ -25,7 +25,7 @@ export function Project({
     >
       <Image
         src={image}
-        layout="responsive"
+        layout="fixed"
         className={project.thumbnail}
         width={400}
         height={300}
