@@ -14,8 +14,8 @@ This repo contains the source code and media for my personal portfolio website. 
 5. Link to back end for dynamic projects content
 6. Add "outside of work" page
 7. Move contact info to top of page
-8. Add github link
-9. Add LinkedIn link
+8. ~~Add github link~~ (2021-10-14)
+9. ~~Add LinkedIn link~~ (2021-10-14)
 10. Make nice icons for contact info
 11. Redo DDR project & add
 12. Add sensed CPR dummy project

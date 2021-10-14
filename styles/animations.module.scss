@@ -1,0 +1,54 @@
+
+@property --a{
+  inherits: false;
+  initial-value: rgb(7, 133, 101);
+  syntax: "<color>";
+}
+@property --b{
+  inherits: false;
+  initial-value: rgb(62, 105, 185);
+  syntax: "<color>";
+}
+@property --c{
+  inherits: false;
+  initial-value: rgb(128, 190, 46);
+  syntax: "<color>";
+}
+
+@keyframes colorshift {
+  // css variables and keyframe animations don't play nicely together :(
+  // so we have a bit of a mess until the world catches up
+
+  0% {
+    --a: rgb(7, 133, 101);
+    --b: rgb(62, 105, 185);
+    --c: rgb(128, 190, 46);
+  }
+
+  25% {
+    --a: rgb(128, 190, 46);
+    --b: rgb(7, 133, 101);
+    --c: rgb(62, 105, 185);
+  }
+
+  50% {
+    --a: rgb(62, 105, 185);
+    --b: rgb(128, 190, 46);
+    --c: rgb(7, 133, 101);
+  }
+
+  100% {
+    --a: rgb(7, 133, 101);
+    --b: rgb(62, 105, 185);
+    --c: rgb(128, 190, 46);
+  }
+}
+  
+.colorshift {
+  animation: colorshift 60s infinite;
+  background: linear-gradient(90deg, var(--a), var(--b), var(--c));
+  // initial colors for firefox to work correctly
+  --a: rgb(7, 133, 101);
+  --b: rgb(62, 105, 185);
+  --c: rgb(128, 190, 46);
+}

@@ -5,6 +5,7 @@ import Head from 'next/head';
 // components
 import { Link } from '../ui/link';
 import { Project } from '../ui/project';
+import { IProject } from './api/project';
 
 // config
 import { projects } from '../content';
@@ -12,11 +13,15 @@ import { projects } from '../content';
 // styles
 import styles from '../styles/Home.module.scss';
 import theming from '../styles/theming.module.scss';
-import { IProject } from './api/project';
+import animations from '../styles/animations.module.scss';
 
 const Home: NextPage = () => {
   return (
     <div className={styles.container}>
+      <div
+        style={{ width: '100vw', height: '20px' }}
+        className={`${styles['color-bar']} ${animations.colorshift}`}
+      />
       <Head>
         <title>Oh hi!</title>
         <meta name="description" content="Emily Charles - personal website" />
@@ -106,7 +111,7 @@ const Home: NextPage = () => {
         </section> */}
       </main>
 
-      <footer className={styles.footer}>
+      <footer className={`${styles.footer} ${animations.colorshift}`}>
         <div id="construction">
           <div>
             This site is a bit of a sandbox. Please forgive any rough edges!
@@ -115,10 +120,20 @@ const Home: NextPage = () => {
         </div>
         <ul>
           <li>
-            <Link text="Contact" target="mailto:hello@emilywcharles.com" />
+            <Link text="Resume" target="/ECharlesResume.pdf" download={true} />
           </li>
           <li>
-            <Link text="Resume" target="/ECharlesResume.pdf" download={true} />
+            <Link text="Contact" target="mailto:hello@emilywcharles.com" />
+          </li>
+
+          <li>
+            <Link text="Github" target="http://www.github.com/awordforthat" />
+          </li>
+          <li>
+            <Link
+              text="LinkedIn"
+              target="https://www.linkedin.com/in/emily-charles-a87716126/"
+            />
           </li>
         </ul>
       </footer>

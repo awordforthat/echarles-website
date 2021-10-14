@@ -1,3 +1,5 @@
+@import "./palette.scss";
+
 .container {
   align-items: center;
   display: flex;
@@ -5,6 +7,11 @@
   justify-content: center;
   min-height: 100vh;
   padding: 0 2rem;
+
+  .color-bar {
+    height: 20px;
+    width: 100vw;
+  }
 }
 
 .main {
@@ -30,10 +37,9 @@
 
 .footer {
   align-items: center;
-  border-top: 1px solid #eaeaea;
   display: flex;
   flex-direction: column;
-  height: 100px;
+  height: 200px;
   justify-content: center;
   padding: unset;
   position: relative;
