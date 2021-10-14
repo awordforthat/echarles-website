@@ -8,7 +8,7 @@ import { Project } from '../ui/project';
 import { IProject } from './api/project';
 
 // config
-import { projects } from '../content';
+import { projects, skills } from '../content';
 
 // styles
 import styles from '../styles/Home.module.scss';
@@ -96,19 +96,40 @@ const Home: NextPage = () => {
           </div>
         </section>
 
-        {/* <section id="skills">
+        <section id="skills">
           <h2>Skills</h2>
+          {skills.map((category, index) => {
+            return (
+              <div
+                key={`skill-section-${index}`}
+                className={styles['skill-section']}
+              >
+                <h3>{category.title}</h3>
+                <ul>
+                  {category.content.map((skill) => {
+                    return (
+                      <li key={`skill-${skill.replace(' ', '')}`}>{skill}</li>
+                    );
+                  })}
+                </ul>
+                {category.learning && (
+                  <div className={`${styles['skill-section']} learning`}>
+                    Learning:
+                    <ul>
+                      {category.learning.map((skill) => {
+                        return (
+                          <li key={`skill-${skill.replace(' ', '')}`}>
+                            {skill}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </section>
-        <section>
-          <h2>Project ideas</h2>
-          <div></div>
-        </section>
-        <section id="life">
-          <h2>Other Interests</h2>
-          <div>Occasionally I do things that are not code</div>
-          <div>Woodworking</div>
-          <div>Parkour</div>
-        </section> */}
       </main>
 
       <footer className={`${styles.footer} ${animations.colorshift}`}>

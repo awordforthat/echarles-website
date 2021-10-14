@@ -60,3 +60,60 @@ export const projects: Record<string, IProject> = {
     personal: true,
   },
 };
+
+export const skills = [
+  {
+    title: 'Coding Languages',
+    content: [
+      'Python',
+      'JS/Typescript',
+      'C#',
+      'HTML5',
+      'CSS',
+      'ActionScript',
+      'batch scripting',
+      'Processing',
+    ],
+  },
+  {
+    title: 'Frameworks/Libraries',
+    content: [
+      'React',
+      'NodeJS',
+      'sass',
+      'webpack',
+      'eslint',
+      'Unity',
+      'AVProVideo',
+      'pdb',
+      'black',
+      'flake8',
+    ],
+    learning: ['Django', 'Django REST framework', 'NextJS'],
+  },
+  {
+    title: 'Development Environments',
+    content: ['PyCharm', 'VSCode', 'Jupyter notebooks'],
+  },
+  {
+    title: 'Creative Tools',
+    content: ['Photoshop', 'Illustrator', 'Premiere Pro', 'Figma', 'Sketchup'],
+  },
+  {
+    title: 'Workflow Tools',
+    content: [
+      'JIRA',
+      'Bitbucket',
+      'SourceTree',
+      'git',
+      'GitHub',
+      'Confluence',
+      'Jenkins',
+      'CircleCI',
+    ],
+  },
+  {
+    title: 'Other',
+    content: ['ffmpeg'],
+  },
+];

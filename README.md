@@ -22,6 +22,7 @@ This repo contains the source code and media for my personal portfolio website. 
 13. Add nice animations/transitions 
 14. Light mode/dark mode
 15. Add Project Ideas section
+16. Experiment with flex-grid for project cards
 
 ## Deployment
 
