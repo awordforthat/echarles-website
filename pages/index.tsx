@@ -134,6 +134,18 @@ const Home: NextPage = () => {
             })}
           </div>
         </section>
+        <section>
+          <h2>Occasionally I do things that aren't coding.</h2>
+          <div>
+            You might find me <Link text="here" target="www.pkgenboston.com" />{' '}
+            or{' '}
+            <Link
+              text="here"
+              target="https://www.etsy.com/shop/birdsongwoodwork"
+            />{' '}
+            sometimes.
+          </div>
+        </section>
       </main>
 
       <footer className={`${styles.footer} ${animations.colorshift}`}>
