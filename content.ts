@@ -1,4 +1,4 @@
-import { IProject } from './pages/api/project';
+import { IProject, ISkillSet } from './pages/api/project';
 
 // static data source for now - should come from back end later
 export const projects: Record<string, IProject> = {
@@ -61,27 +61,29 @@ export const projects: Record<string, IProject> = {
   },
 };
 
-export const skills = [
+export const skills: ISkillSet[] = [
   {
     title: 'Coding Languages',
     content: [
       'Python',
       'JS/Typescript',
-      'C#',
       'HTML5',
       'CSS',
+      'C#',
       'ActionScript',
       'batch scripting',
       'Processing',
     ],
   },
   {
-    title: 'Frameworks/Libraries',
+    title: 'Frameworks',
     content: [
       'React',
       'NodeJS',
       'sass',
       'webpack',
+      'npm',
+      'yarn',
       'eslint',
       'Unity',
       'AVProVideo',
@@ -89,10 +91,9 @@ export const skills = [
       'black',
       'flake8',
     ],
-    learning: ['Django', 'Django REST framework', 'NextJS'],
   },
   {
-    title: 'Development Environments',
+    title: 'IDEs',
     content: ['PyCharm', 'VSCode', 'Jupyter notebooks'],
   },
   {
@@ -100,7 +101,7 @@ export const skills = [
     content: ['Photoshop', 'Illustrator', 'Premiere Pro', 'Figma', 'Sketchup'],
   },
   {
-    title: 'Workflow Tools',
+    title: 'Workflow',
     content: [
       'JIRA',
       'Bitbucket',
@@ -114,6 +115,6 @@ export const skills = [
   },
   {
     title: 'Other',
-    content: ['ffmpeg'],
+    content: ['ffmpeg', 'Arduino', 'Raspberry Pi'],
   },
 ];

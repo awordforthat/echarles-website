@@ -42,9 +42,9 @@ const Home: NextPage = () => {
             I'm a software engineer, and I love working on projects that merge
             the physical world and the virtual world. What I do doesn't fit
             neatly into the "front-end" and "back-end" buckets, and I really
-            like that! I've worked with a wide variety of technologies that
-            include traditional web development, museum interactives, game
-            development, benchtop electronics, and more.
+            like that! I've worked with a wide variety of skills that include
+            traditional web development, museum interactives, game development,
+            benchtop electronics, and more.
           </div>
 
           <div></div>
@@ -98,37 +98,41 @@ const Home: NextPage = () => {
 
         <section id="skills">
           <h2>Skills</h2>
-          {skills.map((category, index) => {
-            return (
-              <div
-                key={`skill-section-${index}`}
-                className={styles['skill-section']}
-              >
-                <h3>{category.title}</h3>
-                <ul>
-                  {category.content.map((skill) => {
-                    return (
-                      <li key={`skill-${skill.replace(' ', '')}`}>{skill}</li>
-                    );
-                  })}
-                </ul>
-                {category.learning && (
-                  <div className={`${styles['skill-section']} learning`}>
-                    Learning:
-                    <ul>
-                      {category.learning.map((skill) => {
-                        return (
-                          <li key={`skill-${skill.replace(' ', '')}`}>
-                            {skill}
-                          </li>
-                        );
-                      })}
-                    </ul>
+          <div className={styles['skill-list']}>
+            {skills.map((category, index) => {
+              return (
+                <div
+                  key={`skill-section-${index}`}
+                  className={styles['skill-section']}
+                >
+                  <div className={styles['skill-name-container']}>
+                    <h3>{category.title}</h3>
                   </div>
-                )}
-              </div>
-            );
-          })}
+                  <ul>
+                    {category.content.map((skill) => {
+                      return (
+                        <li key={`skill-${skill.replace(' ', '')}`}>{skill}</li>
+                      );
+                    })}
+                  </ul>
+                  {category.learning && (
+                    <div className={`learning`}>
+                      Learning:
+                      <ul>
+                        {category.learning.map((skill) => {
+                          return (
+                            <li key={`skill-${skill.replace(' ', '')}`}>
+                              {skill}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </section>
       </main>
 

@@ -7,3 +7,9 @@ export interface IProject {
   personal?: boolean;
   featured?: boolean; // TODO: refactor homepage to only display featured content
 }
+
+export interface ISkillSet {
+  title: string;
+  content: string[];
+  learning?: string[];
+}

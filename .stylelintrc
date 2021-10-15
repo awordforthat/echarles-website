@@ -20,6 +20,7 @@
         "function-url-quotes": "always",
         "comment-whitespace-inside": "always",
         "rule-empty-line-before": "always",
+        "no-descending-specificity": null,
         "max-empty-lines": [1, {
             "ignore": [
                 "comments"

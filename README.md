@@ -7,7 +7,7 @@ This repo contains the source code and media for my personal portfolio website. 
 2. Run `yarn dev` to serve the site on localhost (port 3000 by default).
 
 ### TODOs
-1. Add Skills section
+1. ~~Add Skills section~~ (2021-10-14)
 2. Add link to `pdb` talk
 3. Add page for all my presentations
 4. Add longer project writeups on separate pages
@@ -23,6 +23,7 @@ This repo contains the source code and media for my personal portfolio website. 
 14. Light mode/dark mode
 15. Add Project Ideas section
 16. Experiment with flex-grid for project cards
+17. Make skills section look nicer
 
 ## Deployment
 
