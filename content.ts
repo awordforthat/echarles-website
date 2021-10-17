@@ -46,7 +46,7 @@ export const projects: Record<string, IProject> = {
     title: 'Knowledge in Common',
     image: '/projects/code_distorted_1.png',
     description:
-      "For a long time, I've been turning over the idea of a community based around trading skills. I have a set of skills that I can teach, and a set that I want to learn. It's likely that someone out there has opposite, or at least intersecting, interests. This platform would have people trade an hour of teaching for an hour of learning. This particular attempt didn't get very far (see: Level99 above!) but I intend to come back to it because I'm still intrigued by the idea.",
+      "For a long time, I've been turning over the idea of a community based around trading skills. I have a set of skills that I can teach, and a set that I want to learn. It's likely that someone out there wants to learn what I can teach, and can teach what I want to learn. This was a first attempt at a website to connect people with those overlapping interests.",
     technologies: ['Javascript', 'React', 'Typescript', 'MongoDB'],
     personal: true,
   },

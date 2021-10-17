@@ -25,7 +25,7 @@ export function Project({
     >
       <Image
         src={image}
-        layout="fixed"
+        layout="responsive"
         className={project.thumbnail}
         width={400}
         height={300}
@@ -33,22 +33,21 @@ export function Project({
         blurDataURL={'/dataBlur.png'}
       />
       <div className={project.title}>{title}</div>
-      <div className={project.contents}>
-        {description}
-        <div className={project.footer}>
-          <div className={project.more}></div>
-          <div className={project.technologies}>
-            {technologies.map((tech, index) => {
-              return (
-                <div
-                  key={`${title}-tech-${index}`}
-                  className={project.technology}
-                >
-                  {tech}
-                </div>
-              );
-            })}
-          </div>
+      <div className={project['transition-gradient']} />
+      <div className={project.contents}>{description}</div>
+      <div className={project.footer}>
+        <div className={project.more}></div>
+        <div className={project.technologies}>
+          {technologies.map((tech, index) => {
+            return (
+              <div
+                key={`${title}-tech-${index}`}
+                className={project.technology}
+              >
+                {tech}
+              </div>
+            );
+          })}
         </div>
       </div>
     </a>
