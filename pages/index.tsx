@@ -14,6 +14,7 @@ import { projects, skills } from '../content';
 import styles from '../styles/Home.module.scss';
 import theming from '../styles/theming.module.scss';
 import animations from '../styles/animations.module.scss';
+import YoutubeEmbed from '../ui/youtube';
 
 const Home: NextPage = () => {
   return (
@@ -134,13 +135,34 @@ const Home: NextPage = () => {
             })}
           </div>
         </section>
+        <section className={styles['bos-py']}>
+          <h2>Boston Python</h2>
+          <div>
+            I spend some of my time as an organizer for{' '}
+            <Link target="www.about.bostonpython.com" text="Boston Python" />. I
+            run online, beginner-focused study groups that cover a wide range of
+            Python-related topics.
+          </div>
+          <div>
+            I'm strongly of the opinion that one of the best ways to learn
+            something is to teach it. That's the driving concept behind these
+            groups. For every session, the (rotating) presenter chooses a topic
+            they <b>don't</b> have experience in, researches it, then presents
+            the topic to the group.
+          </div>
+          <div>
+            Below is a talk that I gave for Boston Python that spawned the idea
+            for these groups:
+          </div>
+          <YoutubeEmbed embedId="GcwWqizJXcs" title="Pdb talk" />
+        </section>
         <section>
           <h2>Occasionally I do things that aren't coding.</h2>
           <div>
-            You might find me <Link text="here" target="www.pkgenboston.com" />{' '}
-            or{' '}
+            You might find me{' '}
+            <Link text="doing parkour" target="www.pkgenboston.com" /> or{' '}
             <Link
-              text="here"
+              text="woodworking"
               target="https://www.etsy.com/shop/birdsongwoodwork"
             />{' '}
             sometimes.

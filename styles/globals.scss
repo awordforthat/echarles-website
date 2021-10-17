@@ -25,6 +25,8 @@ section {
   display: flex;
   flex-direction: column;
   height: fit-content;
+  margin-bottom: 50px;
+  margin-top: 50px;
   max-width: 800px;
   width: 100%;
 }
@@ -61,4 +63,19 @@ section {
     text-align: center;
     width: 75%;
   }
+}
+
+.video-responsive {
+  height: 0;
+  overflow: hidden;
+  padding-bottom: 56.25%;
+  position: relative;
+}
+
+.video-responsive iframe {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
 }
