@@ -1,6 +1,6 @@
 // frameworks
 import * as React from 'react';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 
 // css
 import project from '../styles/project.module.scss';
@@ -26,6 +26,7 @@ export function Project({
       <Image
         src={image}
         layout="responsive"
+        alt="description"
         className={project.thumbnail}
         width={400}
         height={300}
