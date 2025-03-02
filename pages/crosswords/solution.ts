@@ -1,7 +1,8 @@
 type Answer = {
   clue: string;
   answer: string;
-  linkedAnswers?: string[];
+  linkedAnswers?: { key: string; direction: string }[];
+  number?: number;
 };
 
 type Grid = Map<string, ICell>;
@@ -24,7 +25,10 @@ export interface ICell {
   number?: number;
 }
 
-export function generateDownGrid(clues: Clues, gridSize: number): Grid {
+export function DEBUG_ONLY_generateDownGrid(
+  clues: Clues,
+  gridSize: number
+): Grid {
   const grid: Grid = new Map();
   if (!clues.down) return new Map();
 
@@ -65,16 +69,23 @@ export function generateGrid(clues: Clues, gridSize: number): Grid {
         row,
         col: col + i,
         answerContent: answer.answer[i],
+        number: i == 0 ? answer.number : undefined,
       });
     }
   }
 
   // TODO:  remove double iteration.
-  // Fill in black cells.
+  // Fill in black cells and missing numbers.
   for (let i = 0; i < gridSize; i++) {
     for (let j = 0; j < gridSize; j++) {
       const cell = grid.get(`${i},${j}`);
-      if (cell) continue;
+      if (cell) {
+        const acrossAnswer = clues.across.get(`${i},${j}`);
+        const downAnswer = clues.down.get(`${i},${j}`);
+        if (cell.number == null)
+          cell.number = acrossAnswer?.number ?? downAnswer?.number;
+        continue;
+      }
       grid.set(`${i},${j}`, {
         row: i,
         col: j,

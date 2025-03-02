@@ -22,6 +22,7 @@ export function Crossword() {
             key={key}
             row={row}
             col={col}
+            number={cell.number}
             answerContent={cell?.answerContent}
           />
         );
