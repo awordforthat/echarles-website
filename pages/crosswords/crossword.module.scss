@@ -1,3 +1,7 @@
+.debug {
+  border: 1px solid red !important;
+}
+
 .crossword {
   --cell-size: 35px;
   
@@ -39,6 +43,9 @@
         top: 0.1em;
         position: relative;
         user-select: none;
+      }
+      &.selected-secondary {
+        background: lightblue;
       }
 
       &.selected {

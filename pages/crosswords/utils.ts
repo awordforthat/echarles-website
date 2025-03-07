@@ -1,29 +1,11 @@
-type Answer = {
-  clue: string;
-  answer: string;
-  linkedAnswers?: { key: string; direction: string }[];
-  number?: number;
-};
-
-type Grid = Map<string, ICell>;
-export type Clues = {
-  across: Map<string, Answer>;
-  down: Map<string, Answer>;
-};
-
-export type Crossword = {
-  gridSize: number;
-  grid: Grid;
-  clues: Clues;
-};
-
-export interface ICell {
-  row: number;
-  col: number;
-  userContent?: string;
-  answerContent?: string; // undefined for black cells
-  number?: number;
-}
+import {
+  Answer,
+  Clues,
+  Direction,
+  Grid,
+  GridCoordinate,
+  NavigationDirection,
+} from './types';
 
 export function DEBUG_ONLY_generateDownGrid(
   clues: Clues,
@@ -93,4 +75,63 @@ export function generateGrid(clues: Clues, gridSize: number): Grid {
     }
   }
   return grid;
+}
+
+export function getContainingAnswer(
+  row: number,
+  col: number,
+  direction: Direction,
+  clues: Clues
+): { answer: Answer; key: string } | null {
+  const answers = clues[direction];
+  for (const [key, answer] of Array.from(answers.entries())) {
+    if (answerContainsCell(key, answer, row, col, direction)) {
+      return { answer, key };
+    }
+  }
+  return null;
+}
+
+export function answerContainsCell(
+  key: string,
+  answer: Answer,
+  row: number,
+  col: number,
+  direction: Direction
+): boolean {
+  const [answerRow, answerCol] = key.split(',').map((x) => parseInt(x));
+  const lineNum = direction == 'across' ? answerCol : answerRow;
+  const wordEnd = lineNum + answer.answer.length;
+  if (direction == 'across') {
+    if (row == answerRow && col >= lineNum && col < wordEnd) return true;
+  } else if (col == answerCol && row >= lineNum && row < wordEnd) return true;
+  return false;
+}
+
+export function getNextCell(
+  currentCell: GridCoordinate,
+  direction: NavigationDirection,
+  gridSize: number
+) {
+  let vec = { row: 0, col: 0 };
+  switch (direction) {
+    case 'up':
+      vec = { row: 0, col: -1 };
+      break;
+    case 'down':
+      vec = { row: 0, col: 1 };
+      break;
+    case 'left':
+      vec = { row: -1, col: 0 };
+      break;
+    case 'right':
+      vec = { row: 1, col: 0 };
+      break;
+    default:
+      break;
+  }
+  return {
+    row: currentCell.row + (vec.row % gridSize),
+    col: currentCell.col + (vec.col % gridSize),
+  };
 }

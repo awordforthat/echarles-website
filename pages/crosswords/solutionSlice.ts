@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/named
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Crossword } from './solution';
 import { hopskipjumpsolution } from './hopskipjump';
+import { Crossword } from './types';
 
 const initialState = hopskipjumpsolution;
 const solutionSlice = createSlice({

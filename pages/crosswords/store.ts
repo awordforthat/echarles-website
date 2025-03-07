@@ -1,10 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import selectedCellReducer from './cellSlice';
 import solutionReducer from './solutionSlice';
+import selectionReducer from './selectionSlice';
 
 export const store = configureStore({
   reducer: {
-    selectedCell: selectedCellReducer,
+    selection: selectionReducer,
     solution: solutionReducer,
   },
 });

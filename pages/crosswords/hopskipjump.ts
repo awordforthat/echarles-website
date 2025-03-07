@@ -1,4 +1,4 @@
-import { Clues, Crossword, generateGrid } from './solution';
+import { Clues, Crossword, generateGrid } from './utils';
 
 const hopskipjumpGridSize = 15;
 export const hopskipjumpclues: Clues = {
