@@ -3,16 +3,77 @@
 import React from 'react';
 import styles from './crossword.module.scss';
 import { Cell } from './cell';
-import { useAppDispatch, useAppSelector } from './hooks';
-import { useAnswerChange } from './useAnswerChange';
+import { useAppSelector } from './hooks';
+import { useSelectionUpdates } from './useSelectionUpdates';
 import { getNextCell } from './utils';
+import { setSelectedCell } from './selectionSlice';
+import { useDispatch } from 'react-redux';
+import { NavigationDirection } from './types';
+import { setSolution } from './solutionSlice';
+import { hopskipjumpsolution } from './hopskipjump';
 
 export function Crossword() {
   const solution = useAppSelector((state) => state.solution);
   const selections = useAppSelector((state) => state.selection);
   const direction = useAppSelector((state) => state.selection.direction);
-  const { updateAnswerInPlace, updateAnswerNewCell } = useAnswerChange();
+  const dispatch = useDispatch();
+  const { updateAnswer, toggleDirection } = useSelectionUpdates();
 
+  React.useEffect(() => {
+    dispatch(setSolution(hopskipjumpsolution));
+  }, [dispatch]);
+
+  const handleArrowKeys = React.useCallback(
+    (e: React.KeyboardEvent) => {
+      const currentCell = {
+        row: selections.row ?? 0,
+        col: selections.col ?? 0,
+      };
+      let navDirection: NavigationDirection = 'up';
+      switch (e.code) {
+        case 'ArrowUp':
+          navDirection = 'up';
+          break;
+        case 'ArrowDown':
+          navDirection = 'down';
+          break;
+        case 'ArrowLeft':
+          navDirection = 'left';
+          break;
+        case 'ArrowRight':
+          navDirection = 'right';
+          break;
+      }
+
+      // If the arrow key is on the opposite axis than the current nav direction,
+      // just toggle direction, don't advance the selection.
+      if (
+        (direction == 'across' && ['up', 'down'].includes(navDirection)) ||
+        (direction == 'down' && ['left', 'right'].includes(navDirection))
+      ) {
+        toggleDirection();
+        return;
+      }
+
+      const nextCell = getNextCell(
+        currentCell,
+        navDirection,
+        solution.gridSize
+      );
+      dispatch(setSelectedCell(nextCell));
+      updateAnswer({ cell: nextCell });
+      console.log(JSON.stringify(solution));
+    },
+    [
+      direction,
+      dispatch,
+      selections.col,
+      selections.row,
+      solution,
+      toggleDirection,
+      updateAnswer,
+    ]
+  );
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent) => {
       const currentCell = {
@@ -21,31 +82,21 @@ export function Crossword() {
       };
       if (currentCell.row == null || currentCell.col == null) return;
 
-      let nextCell = { row: selections.row, col: selections.col };
+      if (
+        ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)
+      ) {
+        handleArrowKeys(e);
+        return;
+      }
+
       switch (e.code) {
-        case 'ArrowUp':
-          nextCell = getNextCell(currentCell, 'up', solution.gridSize);
-        case 'ArrowDown':
-          nextCell = getNextCell(currentCell, 'down', solution.gridSize);
-        case 'ArrowLeft':
-          nextCell = getNextCell(currentCell, 'left', solution.gridSize);
-        case 'ArrowRight':
-          nextCell = getNextCell(currentCell, 'right', solution.gridSize);
-          updateAnswerNewCell(nextCell);
-          break;
         case 'Space':
-          console.log(' ');
-          updateAnswerInPlace(direction === 'across' ? 'down' : 'across');
+          dispatch(setSelectedCell(currentCell));
+          toggleDirection();
           break;
       }
     },
-    [
-      direction,
-      selections.col,
-      selections.row,
-      updateAnswerInPlace,
-      updateAnswerNewCell,
-    ]
+    [dispatch, handleArrowKeys, selections.col, selections.row, toggleDirection]
   );
 
   const renderGrid = React.useCallback(() => {

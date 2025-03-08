@@ -43,7 +43,7 @@ export function generateGrid(clues: Clues, gridSize: number): Grid {
   const grid: Grid = new Map();
   if (!clues.across) return new Map();
 
-  for (const [rowCol, answer] of Array.from(clues.across.entries())) {
+  for (const [rowCol, answer] of Array.from(clues.across)) {
     const [row, col] = rowCol.split(',').map((x) => parseInt(x));
     for (let i = 0; i < answer.answer.length; i++) {
       const key = `${row},${col + i}`;
@@ -108,6 +108,19 @@ export function answerContainsCell(
   return false;
 }
 
+export function getNextCellWSolution(
+  currentCell: GridCoordinate,
+  direction: NavigationDirection,
+  gridSize: number,
+  solution: Grid
+): GridCoordinate {
+  console.log(JSON.stringify(Array.from(solution.entries())));
+  return {
+    row: (currentCell.row + 1) % gridSize,
+    col: (currentCell.col + 1) % gridSize,
+  };
+}
+
 export function getNextCell(
   currentCell: GridCoordinate,
   direction: NavigationDirection,
@@ -116,22 +129,22 @@ export function getNextCell(
   let vec = { row: 0, col: 0 };
   switch (direction) {
     case 'up':
-      vec = { row: 0, col: -1 };
-      break;
-    case 'down':
-      vec = { row: 0, col: 1 };
-      break;
-    case 'left':
       vec = { row: -1, col: 0 };
       break;
-    case 'right':
+    case 'down':
       vec = { row: 1, col: 0 };
+      break;
+    case 'left':
+      vec = { row: 0, col: -1 };
+      break;
+    case 'right':
+      vec = { row: 0, col: 1 };
       break;
     default:
       break;
   }
   return {
-    row: currentCell.row + (vec.row % gridSize),
-    col: currentCell.col + (vec.col % gridSize),
+    row: (currentCell.row + vec.row) % gridSize,
+    col: (currentCell.col + vec.col) % gridSize,
   };
 }

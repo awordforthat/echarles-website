@@ -1,8 +1,6 @@
 // eslint-disable-next-line import/named
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Answer, Direction } from './types';
-import { getContainingAnswer } from './utils';
-import { hopskipjumpclues } from './hopskipjump';
 
 interface SelectionState {
   row: number;
@@ -39,13 +37,6 @@ const selectionSlice = createSlice({
     },
     setDirection: (state, action: PayloadAction<Direction>) => {
       state.direction = action.payload;
-      const newAnswer = getContainingAnswer(
-        state.row ?? 0,
-        state.col ?? 0,
-        action.payload,
-        hopskipjumpclues
-      );
-      console.log(newAnswer);
     },
   },
 });

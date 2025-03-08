@@ -9,7 +9,7 @@ import {
 import { useAppDispatch, useAppSelector } from './hooks';
 import { answerContainsCell, getContainingAnswer } from './utils';
 import { ICell } from './types';
-import { useAnswerChange } from './useAnswerChange';
+import { useSelectionUpdates } from './useSelectionUpdates';
 
 export function Cell(props: ICell) {
   const { row, col, number, answerContent, userContent } = props;
@@ -22,7 +22,7 @@ export function Cell(props: ICell) {
   });
   const direction = useAppSelector((state) => state.selection.direction);
   const solution = useAppSelector((state) => state.solution);
-  const { updateAnswer } = useAnswerChange();
+  const { updateAnswer } = useSelectionUpdates();
   const cellClasses = classNames(styles.cell, {
     [styles['selected-secondary']]:
       selectedAnswerKey &&
