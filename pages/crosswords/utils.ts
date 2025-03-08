@@ -11,48 +11,49 @@ export function DEBUG_ONLY_generateDownGrid(
   clues: Clues,
   gridSize: number
 ): Grid {
-  const grid: Grid = new Map();
-  if (!clues.down) return new Map();
+  const grid: Grid = {};
+  if (!clues.down) return {};
 
-  for (const [rowCol, answer] of Array.from(clues.down.entries())) {
+  for (const [rowCol, answer] of Object.entries(clues.down)) {
     const [row, col] = rowCol.split(',').map((x) => parseInt(x));
     for (let i = 0; i < answer.answer.length; i++) {
       const key = `${row + i},${col}`;
-      grid.set(key, {
+      grid[key] = {
         row: row + i,
         col,
         answerContent: answer.answer[i],
-      });
+      };
     }
   }
 
   for (let i = 0; i < gridSize; i++) {
     for (let j = 0; j < gridSize; j++) {
-      const cell = grid.get(`${i},${j}`);
+      const cell = grid[`${i},${j}`];
       if (cell) continue;
-      grid.set(`${i},${j}`, {
+      grid[`${i},${j}`] = {
         row: i,
         col: j,
-      });
+      };
     }
   }
   return grid;
 }
 
 export function generateGrid(clues: Clues, gridSize: number): Grid {
-  const grid: Grid = new Map();
-  if (!clues.across) return new Map();
+  const grid: Grid = {};
+  if (!clues.across) return {};
 
-  for (const [rowCol, answer] of Array.from(clues.across)) {
+  console.log(clues);
+  for (const [rowCol, answer] of Object.entries(clues.across)) {
     const [row, col] = rowCol.split(',').map((x) => parseInt(x));
     for (let i = 0; i < answer.answer.length; i++) {
       const key = `${row},${col + i}`;
-      grid.set(key, {
+      grid[key] = {
         row,
         col: col + i,
         answerContent: answer.answer[i],
         number: i == 0 ? answer.number : undefined,
-      });
+      };
     }
   }
 
@@ -60,20 +61,21 @@ export function generateGrid(clues: Clues, gridSize: number): Grid {
   // Fill in black cells and missing numbers.
   for (let i = 0; i < gridSize; i++) {
     for (let j = 0; j < gridSize; j++) {
-      const cell = grid.get(`${i},${j}`);
+      const cell = grid[`${i},${j}`];
       if (cell) {
-        const acrossAnswer = clues.across.get(`${i},${j}`);
-        const downAnswer = clues.down.get(`${i},${j}`);
+        const acrossAnswer = clues.across[`${i},${j}`];
+        const downAnswer = clues.down[`${i},${j}`];
         if (cell.number == null)
           cell.number = acrossAnswer?.number ?? downAnswer?.number;
         continue;
       }
-      grid.set(`${i},${j}`, {
+      grid[`${i},${j}`] = {
         row: i,
         col: j,
-      });
+      };
     }
   }
+  console.log(grid);
   return grid;
 }
 
@@ -84,7 +86,7 @@ export function getContainingAnswer(
   clues: Clues
 ): { answer: Answer; key: string } | null {
   const answers = clues[direction];
-  for (const [key, answer] of Array.from(answers.entries())) {
+  for (const [key, answer] of Object.entries(answers)) {
     if (answerContainsCell(key, answer, row, col, direction)) {
       return { answer, key };
     }
@@ -114,7 +116,6 @@ export function getNextCellWSolution(
   gridSize: number,
   solution: Grid
 ): GridCoordinate {
-  console.log(JSON.stringify(Array.from(solution.entries())));
   return {
     row: (currentCell.row + 1) % gridSize,
     col: (currentCell.col + 1) % gridSize,

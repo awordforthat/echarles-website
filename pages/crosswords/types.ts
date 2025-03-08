@@ -5,10 +5,10 @@ export type Answer = {
   number?: number;
 };
 
-export type Grid = Map<string, ICell>;
+export type Grid = Record<string, ICell>;
 export type Clues = {
-  across: Map<string, Answer>;
-  down: Map<string, Answer>;
+  across: Record<string, Answer>;
+  down: Record<string, Answer>;
 };
 
 export type Crossword = {

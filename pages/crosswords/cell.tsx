@@ -12,7 +12,7 @@ import { ICell } from './types';
 import { useSelectionUpdates } from './useSelectionUpdates';
 
 export function Cell(props: ICell) {
-  const { row, col, number, answerContent, userContent } = props;
+  const { row, col, number, answerContent } = props;
   const dispatch = useAppDispatch();
   const selectedAnswerKey = useAppSelector(
     (state) => state.selection.answerKey
@@ -22,13 +22,13 @@ export function Cell(props: ICell) {
   });
   const direction = useAppSelector((state) => state.selection.direction);
   const solution = useAppSelector((state) => state.solution);
-  const { updateAnswer } = useSelectionUpdates();
+  const { toggleDirection } = useSelectionUpdates();
   const cellClasses = classNames(styles.cell, {
     [styles['selected-secondary']]:
       selectedAnswerKey &&
       answerContainsCell(
         selectedAnswerKey,
-        solution.clues[direction].get(selectedAnswerKey),
+        solution.clues[direction][selectedAnswerKey],
         row,
         col,
         direction
@@ -43,7 +43,7 @@ export function Cell(props: ICell) {
       onClick={() => {
         if (selectedCell.row === row && selectedCell.col === col) {
           // Clicked on same cell, change direction but not cell selection.
-          updateAnswer(direction === 'across' ? 'down' : 'across');
+          toggleDirection();
           return;
         }
         // TODO: combine with above

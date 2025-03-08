@@ -105,7 +105,7 @@ export function Crossword() {
       const currentRow = [];
       for (let col = 0; col < solution.gridSize; col++) {
         const key = `${row},${col}`;
-        const cell = solution.grid.get(key);
+        const cell = solution.grid[key];
 
         if (cell?.answerContent == null) {
           currentRow.push(<Cell key={key} row={row} col={col} />);
