@@ -1,6 +1,7 @@
 import {
   Answer,
   Clues,
+  Crossword,
   Direction,
   Grid,
   GridCoordinate,
@@ -42,8 +43,6 @@ export function DEBUG_ONLY_generateDownGrid(
 export function generateGrid(clues: Clues, gridSize: number): Grid {
   const grid: Grid = {};
   if (!clues.across) return {};
-
-  console.log(clues);
   for (const [rowCol, answer] of Object.entries(clues.across)) {
     const [row, col] = rowCol.split(',').map((x) => parseInt(x));
     for (let i = 0; i < answer.answer.length; i++) {
@@ -75,7 +74,6 @@ export function generateGrid(clues: Clues, gridSize: number): Grid {
       };
     }
   }
-  console.log(grid);
   return grid;
 }
 
@@ -110,22 +108,10 @@ export function answerContainsCell(
   return false;
 }
 
-export function getNextCellWSolution(
-  currentCell: GridCoordinate,
-  direction: NavigationDirection,
-  gridSize: number,
-  solution: Grid
-): GridCoordinate {
-  return {
-    row: (currentCell.row + 1) % gridSize,
-    col: (currentCell.col + 1) % gridSize,
-  };
-}
-
 export function getNextCell(
   currentCell: GridCoordinate,
   direction: NavigationDirection,
-  gridSize: number
+  solution: Crossword
 ) {
   let vec = { row: 0, col: 0 };
   switch (direction) {
@@ -144,8 +130,15 @@ export function getNextCell(
     default:
       break;
   }
-  return {
+  const gridSize = solution.gridSize;
+  const candidate = {
     row: (currentCell.row + vec.row) % gridSize,
     col: (currentCell.col + vec.col) % gridSize,
   };
+  if (
+    solution.grid[`${candidate.row},${candidate.col}`]?.answerContent == null
+  ) {
+    return getNextCell(candidate, direction, solution);
+  }
+  return candidate;
 }

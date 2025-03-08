@@ -5,7 +5,7 @@ import styles from './crossword.module.scss';
 import { Cell } from './cell';
 import { useAppSelector } from './hooks';
 import { useSelectionUpdates } from './useSelectionUpdates';
-import { getNextCell } from './utils';
+import { getNextCell, getNextCellWSolution } from './utils';
 import { setSelectedCell } from './selectionSlice';
 import { useDispatch } from 'react-redux';
 import { NavigationDirection } from './types';
@@ -55,14 +55,10 @@ export function Crossword() {
         return;
       }
 
-      const nextCell = getNextCell(
-        currentCell,
-        navDirection,
-        solution.gridSize
-      );
+      const nextCell = getNextCell(currentCell, navDirection, solution);
+
       dispatch(setSelectedCell(nextCell));
       updateAnswer({ cell: nextCell });
-      console.log(JSON.stringify(solution));
     },
     [
       direction,
