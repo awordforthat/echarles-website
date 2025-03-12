@@ -17,15 +17,20 @@ export type Crossword = {
   clues: Clues;
 };
 
+export type HumanSolution = {
+  across: { number?: number; clue: string; answer: string; key: string }[];
+  down: { number?: number; clue: string; answer: string; key: string }[];
+};
+
 export type GridCoordinate = {
   row: number;
   col: number;
 };
 
 export type ICell = GridCoordinate & {
-  userContent?: string;
-  answerContent?: string; // undefined for black cells
+  content?: string; // undefined for black cells
   number?: number;
 };
+
 export type Direction = 'across' | 'down';
 export type NavigationDirection = 'up' | 'down' | 'left' | 'right';

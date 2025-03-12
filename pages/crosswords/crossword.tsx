@@ -5,17 +5,24 @@ import styles from './crossword.module.scss';
 import { Cell } from './cell';
 import { useAppSelector } from './hooks';
 import { useSelectionUpdates } from './useSelectionUpdates';
-import { getNextCell, getNextCellWSolution } from './utils';
+import {
+  getNextCellAutoNavigation,
+  getNextCellManualNavigation,
+  rowColToKey,
+} from './utils';
 import { setSelectedCell } from './selectionSlice';
 import { useDispatch } from 'react-redux';
 import { NavigationDirection } from './types';
 import { setSolution } from './solutionSlice';
 import { hopskipjumpsolution } from './hopskipjump';
+import { setCellContent } from './inputSlice';
 
 export function Crossword() {
-  const solution = useAppSelector((state) => state.solution);
+  const devSolution = useAppSelector((state) => state.solution.devSolution);
+  const humanSolution = useAppSelector((state) => state.solution.humanSolution);
   const selections = useAppSelector((state) => state.selection);
   const direction = useAppSelector((state) => state.selection.direction);
+  const userContent = useAppSelector((state) => state.userContent.grid);
   const dispatch = useDispatch();
   const { updateAnswer, toggleDirection } = useSelectionUpdates();
 
@@ -55,7 +62,11 @@ export function Crossword() {
         return;
       }
 
-      const nextCell = getNextCell(currentCell, navDirection, solution);
+      const nextCell = getNextCellManualNavigation(
+        currentCell,
+        navDirection,
+        devSolution
+      );
 
       dispatch(setSelectedCell(nextCell));
       updateAnswer({ cell: nextCell });
@@ -65,7 +76,7 @@ export function Crossword() {
       dispatch,
       selections.col,
       selections.row,
-      solution,
+      devSolution,
       toggleDirection,
       updateAnswer,
     ]
@@ -85,6 +96,23 @@ export function Crossword() {
         return;
       }
 
+      if (e.key.length === 1) {
+        dispatch(
+          setCellContent({
+            cellKey: `${selections.row},${selections.col}`,
+            content: e.key,
+          })
+        );
+        if (!selections.answer) return;
+        dispatch(
+          setSelectedCell(
+            getNextCellAutoNavigation(currentCell, direction, humanSolution, 0)
+          )
+        );
+
+        return;
+      }
+
       switch (e.code) {
         case 'Space':
           dispatch(setSelectedCell(currentCell));
@@ -92,28 +120,41 @@ export function Crossword() {
           break;
       }
     },
-    [dispatch, handleArrowKeys, selections.col, selections.row, toggleDirection]
+    [
+      direction,
+      dispatch,
+      handleArrowKeys,
+      selections.answer,
+      selections.col,
+      selections.row,
+      devSolution,
+      toggleDirection,
+    ]
   );
 
   const renderGrid = React.useCallback(() => {
     const rows = [];
-    for (let row = 0; row < solution.gridSize; row++) {
+    for (let row = 0; row < devSolution.gridSize; row++) {
       const currentRow = [];
-      for (let col = 0; col < solution.gridSize; col++) {
-        const key = `${row},${col}`;
-        const cell = solution.grid[key];
+      for (let col = 0; col < devSolution.gridSize; col++) {
+        const key = rowColToKey(row, col);
+        const cell = devSolution.grid[key];
 
-        if (cell?.answerContent == null) {
-          currentRow.push(<Cell key={key} row={row} col={col} />);
+        if (cell?.content == null) {
+          currentRow.push(
+            <Cell key={key} row={row} col={col} userContent={null} />
+          );
           continue;
         }
+
         currentRow.push(
           <Cell
             key={key}
             row={row}
             col={col}
             number={cell.number}
-            answerContent={cell?.answerContent}
+            content={cell?.content}
+            userContent={userContent[key]}
           />
         );
       }
@@ -124,7 +165,7 @@ export function Crossword() {
       );
     }
     return rows;
-  }, [solution.grid, solution.gridSize]);
+  }, [devSolution.grid, devSolution.gridSize, userContent]);
 
   return (
     <div tabIndex={0} className={styles.crossword} onKeyDown={handleKeyDown}>

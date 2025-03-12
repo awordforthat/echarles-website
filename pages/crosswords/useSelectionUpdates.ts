@@ -9,7 +9,7 @@ import {
 import { Direction } from './types';
 
 export function useSelectionUpdates() {
-  const solution = useAppSelector((state) => state.solution);
+  const devSolution = useAppSelector((state) => state.solution.devSolution);
   const selections = useAppSelector((state) => state.selection);
   const direction = useAppSelector((state) => state.selection.direction);
   const dispatch = useAppDispatch();
@@ -28,7 +28,7 @@ export function useSelectionUpdates() {
           row,
           col,
           newDirection,
-          solution.clues
+          devSolution.clues
         );
         if (result) {
           if (params.direction) {
@@ -40,11 +40,11 @@ export function useSelectionUpdates() {
       }
     },
     [
-      dispatch,
       selections.row,
       selections.col,
       selections.direction,
-      solution.clues,
+      devSolution.clues,
+      dispatch,
     ]
   );
 

@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import solutionReducer from './solutionSlice';
 import selectionReducer from './selectionSlice';
+import inputReducer from './inputSlice';
 
 export const store = configureStore({
   reducer: {
     selection: selectionReducer,
     solution: solutionReducer,
+    userContent: inputReducer,
   },
 });
 

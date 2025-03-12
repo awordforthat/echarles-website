@@ -11,8 +11,8 @@ import { answerContainsCell, getContainingAnswer } from './utils';
 import { ICell } from './types';
 import { useSelectionUpdates } from './useSelectionUpdates';
 
-export function Cell(props: ICell) {
-  const { row, col, number, answerContent } = props;
+export function Cell(props: ICell & { userContent: string | null }) {
+  const { row, col, number, content: answerContent, userContent } = props;
   const dispatch = useAppDispatch();
   const selectedAnswerKey = useAppSelector(
     (state) => state.selection.answerKey
@@ -21,14 +21,14 @@ export function Cell(props: ICell) {
     return { row: state.selection.row, col: state.selection.col };
   });
   const direction = useAppSelector((state) => state.selection.direction);
-  const solution = useAppSelector((state) => state.solution);
+  const devSolution = useAppSelector((state) => state.solution.devSolution);
   const { toggleDirection } = useSelectionUpdates();
   const cellClasses = classNames(styles.cell, {
     [styles['selected-secondary']]:
       selectedAnswerKey &&
       answerContainsCell(
         selectedAnswerKey,
-        solution.clues[direction][selectedAnswerKey],
+        devSolution.clues[direction][selectedAnswerKey],
         row,
         col,
         direction
@@ -52,7 +52,7 @@ export function Cell(props: ICell) {
             row,
             col,
             direction,
-            solution.clues
+            devSolution.clues
           );
           dispatch(setSelectedCell({ row, col }));
           if (result) {
@@ -63,7 +63,7 @@ export function Cell(props: ICell) {
       }}
     >
       <div className={styles['number-container']}>{number}</div>
-      <div className={styles['content-container']}>{answerContent?.[0]}</div>
+      <div className={styles['content-container']}>{userContent?.[0]}</div>
     </div>
   );
 }
