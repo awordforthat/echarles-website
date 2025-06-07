@@ -2,7 +2,7 @@ export type Answer = {
   clue: string;
   answer: string;
   linkedAnswers?: { key: string; direction: string }[];
-  number?: number;
+  number: number;
 };
 
 export type Grid = Record<string, ICell>;
@@ -17,9 +17,16 @@ export type Crossword = {
   clues: Clues;
 };
 
-export type HumanSolution = {
-  across: { number?: number; clue: string; answer: string; key: string }[];
-  down: { number?: number; clue: string; answer: string; key: string }[];
+export type DataByClueAnswerContent = {
+  number?: number;
+  clue: string;
+  answer: string;
+  key: string;
+};
+
+export type DataByClue = {
+  across: DataByClueAnswerContent[];
+  down: DataByClueAnswerContent[];
 };
 
 export type GridCoordinate = {
@@ -30,7 +37,11 @@ export type GridCoordinate = {
 export type ICell = GridCoordinate & {
   content?: string; // undefined for black cells
   number?: number;
+  acrossPrev?: string;
+  acrossNext?: string;
+  downPrev?: string;
+  downNext?: string;
 };
 
-export type Direction = 'across' | 'down';
+export type ClueDirection = 'across' | 'down';
 export type NavigationDirection = 'up' | 'down' | 'left' | 'right';

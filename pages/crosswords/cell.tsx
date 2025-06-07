@@ -1,19 +1,18 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import styles from './crossword.module.scss';
+import { useAppSelector } from './hooks';
 import {
-  setSelectedCell,
-  setSelectedAnswer,
-  setSelectedAnswerKey,
-} from './selectionSlice';
-import { useAppDispatch, useAppSelector } from './hooks';
-import { answerContainsCell, getContainingAnswer } from './utils';
+  answerContainsCell,
+  getContainingAnswer,
+  keyToRowCol,
+  rowColToKey,
+} from './utils';
 import { ICell } from './types';
 import { useSelectionUpdates } from './useSelectionUpdates';
 
 export function Cell(props: ICell & { userContent: string | null }) {
   const { row, col, number, content: answerContent, userContent } = props;
-  const dispatch = useAppDispatch();
   const selectedAnswerKey = useAppSelector(
     (state) => state.selection.answerKey
   );
@@ -21,14 +20,14 @@ export function Cell(props: ICell & { userContent: string | null }) {
     return { row: state.selection.row, col: state.selection.col };
   });
   const direction = useAppSelector((state) => state.selection.direction);
-  const devSolution = useAppSelector((state) => state.solution.devSolution);
-  const { toggleDirection } = useSelectionUpdates();
+  const dataByCell = useAppSelector((state) => state.solution.dataByCell);
+  const { toggleDirection, updateAnswer } = useSelectionUpdates();
   const cellClasses = classNames(styles.cell, {
     [styles['selected-secondary']]:
       selectedAnswerKey &&
       answerContainsCell(
         selectedAnswerKey,
-        devSolution.clues[direction][selectedAnswerKey],
+        dataByCell.clues[direction][selectedAnswerKey],
         row,
         col,
         direction
@@ -46,20 +45,7 @@ export function Cell(props: ICell & { userContent: string | null }) {
           toggleDirection();
           return;
         }
-        // TODO: combine with above
-        if (answerContent) {
-          const result = getContainingAnswer(
-            row,
-            col,
-            direction,
-            devSolution.clues
-          );
-          dispatch(setSelectedCell({ row, col }));
-          if (result) {
-            dispatch(setSelectedAnswer(result.answer));
-            dispatch(setSelectedAnswerKey(result.key));
-          }
-        }
+        updateAnswer({ cell: { row, col } });
       }}
     >
       <div className={styles['number-container']}>{number}</div>

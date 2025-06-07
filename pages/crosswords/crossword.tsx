@@ -10,16 +10,16 @@ import {
   getNextCellManualNavigation,
   rowColToKey,
 } from './utils';
-import { setSelectedCell } from './selectionSlice';
 import { useDispatch } from 'react-redux';
 import { NavigationDirection } from './types';
-import { setSolution } from './solutionSlice';
+import { setDataByCell } from './solutionSlice';
 import { hopskipjumpsolution } from './hopskipjump';
-import { setCellContent } from './inputSlice';
+import { setCellContent } from './userInputSlice';
+import { store } from './store';
 
 export function Crossword() {
-  const devSolution = useAppSelector((state) => state.solution.devSolution);
-  const humanSolution = useAppSelector((state) => state.solution.humanSolution);
+  const dataByCell = useAppSelector((state) => state.solution.dataByCell);
+  const dataByClue = useAppSelector((state) => state.solution.dataByClue);
   const selections = useAppSelector((state) => state.selection);
   const direction = useAppSelector((state) => state.selection.direction);
   const userContent = useAppSelector((state) => state.userContent.grid);
@@ -27,7 +27,7 @@ export function Crossword() {
   const { updateAnswer, toggleDirection } = useSelectionUpdates();
 
   React.useEffect(() => {
-    dispatch(setSolution(hopskipjumpsolution));
+    dispatch(setDataByCell(hopskipjumpsolution));
   }, [dispatch]);
 
   const handleArrowKeys = React.useCallback(
@@ -65,18 +65,16 @@ export function Crossword() {
       const nextCell = getNextCellManualNavigation(
         currentCell,
         navDirection,
-        devSolution
+        dataByCell
       );
 
-      dispatch(setSelectedCell(nextCell));
       updateAnswer({ cell: nextCell });
     },
     [
       direction,
-      dispatch,
       selections.col,
       selections.row,
-      devSolution,
+      dataByCell,
       toggleDirection,
       updateAnswer,
     ]
@@ -92,6 +90,7 @@ export function Crossword() {
       if (
         ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)
       ) {
+        e.preventDefault();
         handleArrowKeys(e);
         return;
       }
@@ -103,42 +102,61 @@ export function Crossword() {
             content: e.key,
           })
         );
+        // Accessing the store directly here ensures that we have
+        // the update that was just made, which is used in the auto navigation call.
+        const updatedUserContent = store.getState().userContent.grid;
         if (!selections.answer) return;
-        dispatch(
-          setSelectedCell(
-            getNextCellAutoNavigation(currentCell, direction, humanSolution, 0)
-          )
+        const nextCellAuto = getNextCellAutoNavigation(
+          currentCell,
+          direction,
+          dataByCell.grid,
+          updatedUserContent
         );
-
+        updateAnswer({ cell: nextCellAuto });
         return;
       }
 
       switch (e.code) {
         case 'Space':
-          dispatch(setSelectedCell(currentCell));
+          e.preventDefault();
+          updateAnswer({ cell: currentCell });
           toggleDirection();
           break;
+        case 'Backspace':
+          dispatch(
+            setCellContent({
+              cellKey: `${selections.row},${selections.col}`,
+              content: '',
+            })
+          );
+          const nextCell = getNextCellManualNavigation(
+            currentCell,
+            direction == 'across' ? 'left' : 'up',
+            dataByCell
+          );
+          updateAnswer({ cell: nextCell });
       }
     },
     [
-      direction,
-      dispatch,
-      handleArrowKeys,
-      selections.answer,
-      selections.col,
       selections.row,
-      devSolution,
+      selections.col,
+      selections.answer,
+      handleArrowKeys,
+      dispatch,
+      direction,
+      dataByCell,
+      updateAnswer,
       toggleDirection,
     ]
   );
 
   const renderGrid = React.useCallback(() => {
     const rows = [];
-    for (let row = 0; row < devSolution.gridSize; row++) {
+    for (let row = 0; row < dataByCell.gridSize; row++) {
       const currentRow = [];
-      for (let col = 0; col < devSolution.gridSize; col++) {
+      for (let col = 0; col < dataByCell.gridSize; col++) {
         const key = rowColToKey(row, col);
-        const cell = devSolution.grid[key];
+        const cell = dataByCell.grid[key];
 
         if (cell?.content == null) {
           currentRow.push(
@@ -165,12 +183,34 @@ export function Crossword() {
       );
     }
     return rows;
-  }, [devSolution.grid, devSolution.gridSize, userContent]);
+  }, [dataByCell.grid, dataByCell.gridSize, userContent]);
 
   return (
-    <div tabIndex={0} className={styles.crossword} onKeyDown={handleKeyDown}>
-      {renderGrid()}
-      <div>{JSON.stringify(selections)}</div>
-    </div>
+    <>
+      <div tabIndex={0} className={styles.crossword} onKeyDown={handleKeyDown}>
+        {renderGrid()}
+        <div>Answer: {JSON.stringify(selections.answer)}</div>
+        <div>Answer num: {JSON.stringify(selections.answerNum)}</div>
+      </div>
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: -50,
+          width: '40vw',
+          margin: '1em',
+          display: 'flex',
+          flexDirection: 'row',
+          border: '1px solid black',
+        }}
+      >
+        <pre style={{ width: '50%' }}>
+          Metadata by Cell
+          {JSON.stringify(dataByCell, null, 2)}
+        </pre>
+        Metadata by Clue
+        <pre>{JSON.stringify(dataByClue, null, 2)}</pre>
+      </div>
+    </>
   );
 }

@@ -1,25 +1,25 @@
 // eslint-disable-next-line import/named
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { hopskipjumpsolution } from './hopskipjump';
-import { Crossword, HumanSolution } from './types';
-import { generateHumanSolution } from './utils';
+import { Crossword, DataByClue } from './types';
+import { generateDataByClue } from './utils';
 
 const initialState = {
-  devSolution: hopskipjumpsolution,
-  humanSolution: generateHumanSolution(hopskipjumpsolution),
+  dataByCell: hopskipjumpsolution,
+  dataByClue: generateDataByClue(hopskipjumpsolution),
 };
 const solutionSlice = createSlice({
   name: 'solution',
   initialState,
   reducers: {
-    setSolution: (state, action: PayloadAction<Crossword>) => {
-      state.devSolution = action.payload;
+    setDataByCell: (state, action: PayloadAction<Crossword>) => {
+      state.dataByCell = action.payload;
     },
-    setHumanSolution: (state, action: PayloadAction<HumanSolution>) => {
-      state.humanSolution = action.payload;
+    setDataByClue: (state, action: PayloadAction<DataByClue>) => {
+      state.dataByClue = action.payload;
     },
   },
 });
 
-export const { setSolution } = solutionSlice.actions;
+export const { setDataByClue, setDataByCell } = solutionSlice.actions;
 export default solutionSlice.reducer;

@@ -1,6 +1,6 @@
 import { Clues, Crossword, generateGrid } from './utils';
 
-const hopskipjumpGridSize = 15;
+export const hopskipjumpGridSize = 15;
 export const hopskipjumpclues: Clues = {
   across: {
     '0,1': {

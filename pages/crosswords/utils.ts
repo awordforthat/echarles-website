@@ -1,11 +1,14 @@
+import { hopskipjumpGridSize } from './hopskipjump';
 import {
   Answer,
   Clues,
   Crossword,
-  Direction,
+  ClueDirection,
   Grid,
   GridCoordinate,
-  HumanSolution,
+  DataByClue,
+  DataByClueAnswerContent,
+  ICell,
   NavigationDirection,
 } from './types';
 
@@ -84,10 +87,58 @@ export function generateGrid(clues: Clues, gridSize: number): Grid {
       };
     }
   }
+
+  // TODO: remove third iteration :(
+  for (let i = 0; i < gridSize; i++) {
+    for (let j = 0; j < gridSize; j++) {
+      // For each cell, calculate the closest cell in the row and column
+      // that isn't the edge of the puzzle and is not black.
+      const cell: ICell = grid[`${i},${j}`];
+      if (i > 0) {
+        let prevRow = i;
+        for (let k = i; k >= 0; k--) {
+          console.log(grid[`${k},${j}`]);
+          if (!grid[`${k},${j}`]) continue;
+          prevRow = k;
+          break;
+        }
+        cell.downPrev = rowColToKey(prevRow, j);
+        console.log('cell', cell, 'prev is ', cell.downPrev);
+      }
+      if (i < gridSize - 1) {
+        let nextRow = i;
+        for (let k = i; k < gridSize; k++) {
+          if (!grid[`${i},${k}`]) continue;
+          nextRow = k;
+          break;
+        }
+        cell.downNext = rowColToKey(nextRow, j);
+      }
+      if (j > 0) {
+        let prevCol = j;
+        for (let k = j; k >= 0; k--) {
+          if (!grid[`${i},${k}`]) continue;
+          prevCol = k;
+          break;
+        }
+        cell.acrossPrev = rowColToKey(i, prevCol);
+      }
+      if (j < gridSize - 1) {
+        let nextCol = j;
+        for (let k = j; k < gridSize; k++) {
+          if (!grid[`${i},${k}`]) continue;
+          nextCol = k;
+          break;
+        }
+        cell.acrossNext = rowColToKey(i, nextCol);
+      }
+    }
+  }
   return grid;
 }
-export function generateHumanSolution(crossword: Crossword) {
-  const result: HumanSolution = {
+
+export function generateDataByClue(crossword: Crossword) {
+  const result: DataByClue = {
     across: [],
     down: [],
   };
@@ -125,13 +176,13 @@ export function generateBlankGrid(
 export function getContainingAnswer(
   row: number,
   col: number,
-  direction: Direction,
+  direction: ClueDirection,
   clues: Clues
-): { answer: Answer; key: string } | null {
+): { answer: Answer; key: string; num: number } | null {
   const answers = clues[direction];
   for (const [key, answer] of Object.entries(answers)) {
     if (answerContainsCell(key, answer, row, col, direction)) {
-      return { answer, key };
+      return { answer, key, num: answer.number };
     }
   }
   return null;
@@ -142,7 +193,7 @@ export function answerContainsCell(
   answer: Answer,
   row: number,
   col: number,
-  direction: Direction
+  direction: ClueDirection
 ): boolean {
   const [answerRow, answerCol] = keyToRowCol(key);
   const lineNum = direction == 'across' ? answerCol : answerRow;
@@ -177,25 +228,70 @@ export function getNextCellManualNavigation(
   }
   const gridSize = solution.gridSize;
   const candidate = {
-    row: (currentCell.row + vec.row) % gridSize,
-    col: (currentCell.col + vec.col) % gridSize,
+    row: Math.max((currentCell.row + vec.row) % gridSize, 0),
+    col: Math.max((currentCell.col + vec.col) % gridSize, 0),
   };
-  if (
-    solution.grid[rowColToKey(candidate.row, candidate.col)]?.content == null
-  ) {
-    return getNextCellManualNavigation(candidate, direction, solution);
-  }
-  return candidate;
+  // Return immediately if at grid start
+  // TODO: wrap at left and top edges
+  if (candidate.row == 0 && candidate.col == 0) return candidate;
+
+  // Recursively find next valid cell if current cell is empty
+  return solution.grid[rowColToKey(candidate.row, candidate.col)]?.content ==
+    null
+    ? getNextCellManualNavigation(candidate, direction, solution)
+    : candidate;
 }
 
 export function getNextCellAutoNavigation(
   currentCell: GridCoordinate,
-  direction: Direction,
-  solution: HumanSolution,
-  currentAnswerIndex: number
+  direction: ClueDirection,
+  grid: Grid,
+  userContent: Record<string, string | null>
 ): GridCoordinate {
-  const clues = solution[direction];
-  console.log(clues[currentAnswerIndex]);
+  const advanceVector = direction == 'across' ? [0, 1] : [1, 0];
+  let nextCell = currentCell;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    nextCell = {
+      row: nextCell.row + advanceVector[0],
+      col: nextCell.col + advanceVector[1],
+    };
 
-  return currentCell;
+    if (nextCell.col >= hopskipjumpGridSize) {
+      nextCell.col = 0;
+      nextCell.row += 1;
+    }
+
+    if (nextCell.row >= hopskipjumpGridSize) {
+      nextCell.row = 0;
+      nextCell.col += 1;
+    }
+
+    if (
+      nextCell.row >= hopskipjumpGridSize ||
+      nextCell.row >= hopskipjumpGridSize
+    ) {
+      nextCell = { row: 0, col: 0 };
+    }
+
+    const newKey = rowColToKey(nextCell.row, nextCell.col);
+
+    if (!grid[newKey].content) continue; // Cell is black.
+    if (userContent[newKey]) continue; // User already entered something.
+    break;
+  }
+  return nextCell;
+}
+
+export function getAnswerStartIndexFromNum(
+  clues: DataByClueAnswerContent[],
+  answerNum: number,
+  direction: ClueDirection
+) {
+  const clueIndex = Object.values(clues).findIndex((c) => {
+    return c.number === answerNum;
+  });
+  if (clueIndex == -1) return 0;
+  const ansStartCell = keyToRowCol(clues[clueIndex].key);
+  return ansStartCell[direction == 'across' ? 1 : 0];
 }

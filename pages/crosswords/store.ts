@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import solutionReducer from './solutionSlice';
 import selectionReducer from './selectionSlice';
-import inputReducer from './inputSlice';
+import inputReducer from './userInputSlice';
 
 export const store = configureStore({
   reducer: {
