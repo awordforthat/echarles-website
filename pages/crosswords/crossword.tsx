@@ -8,6 +8,8 @@ import { useSelectionUpdates } from './useSelectionUpdates';
 import {
   getNextCellAutoNavigation,
   getNextCellManualNavigation,
+  isGridComplete,
+  isGridCorrect,
   rowColToKey,
 } from './utils';
 import { useDispatch } from 'react-redux';
@@ -16,6 +18,8 @@ import { setDataByCell } from './solutionSlice';
 import { hopskipjumpsolution } from './hopskipjump';
 import { setCellContent } from './userInputSlice';
 import { store } from './store';
+import CompletionModal from './puzzleCompleteModal';
+import { showModal, solve, unsolve } from './puzzleStateSlice';
 
 export function Crossword() {
   const dataByCell = useAppSelector((state) => state.solution.dataByCell);
@@ -23,12 +27,35 @@ export function Crossword() {
   const selections = useAppSelector((state) => state.selection);
   const direction = useAppSelector((state) => state.selection.direction);
   const userContent = useAppSelector((state) => state.userContent.grid);
+  const showCompletionModal = useAppSelector(
+    (state) => state.puzzleState.showModal
+  );
+  const solved = useAppSelector((state) => state.puzzleState.solved);
+
   const dispatch = useDispatch();
   const { updateAnswer, toggleDirection } = useSelectionUpdates();
 
   React.useEffect(() => {
     dispatch(setDataByCell(hopskipjumpsolution));
   }, [dispatch]);
+
+  const fillGrid = React.useCallback(
+    (correct: boolean) => {
+      Object.keys(dataByCell.grid).forEach((key) => {
+        if (correct) {
+          dispatch(
+            setCellContent({
+              cellKey: key,
+              content: dataByCell.grid[key].content ?? '',
+            })
+          );
+        } else {
+          dispatch(setCellContent({ cellKey: key, content: 'A' }));
+        }
+      });
+    },
+    [dataByCell, dispatch]
+  );
 
   const handleArrowKeys = React.useCallback(
     (e: React.KeyboardEvent) => {
@@ -106,6 +133,17 @@ export function Crossword() {
         // the update that was just made, which is used in the auto navigation call.
         const updatedUserContent = store.getState().userContent.grid;
         if (!selections.answer) return;
+        if (isGridComplete(updatedUserContent)) {
+          updateAnswer({ cell: { row: 0, col: 0 } });
+          dispatch(showModal({ show: true }));
+          const isWin = isGridCorrect(updatedUserContent, dataByCell.grid);
+          if (isWin) {
+            dispatch(solve());
+          } else {
+            dispatch(unsolve());
+          }
+          return;
+        }
         const nextCellAuto = getNextCellAutoNavigation(
           currentCell,
           direction,
@@ -113,6 +151,7 @@ export function Crossword() {
           updatedUserContent
         );
         updateAnswer({ cell: nextCellAuto });
+
         return;
       }
 
@@ -184,13 +223,37 @@ export function Crossword() {
     }
     return rows;
   }, [dataByCell.grid, dataByCell.gridSize, userContent]);
-
   return (
     <>
       <div tabIndex={0} className={styles.crossword} onKeyDown={handleKeyDown}>
         {renderGrid()}
+        {showCompletionModal && (
+          <CompletionModal
+            onClose={() => {
+              dispatch(showModal({ show: false }));
+            }}
+            title={solved ? 'Solved!' : 'Not yet'}
+            message={
+              solved ? 'Nicely done!' : "Hmm, something's still amiss..."
+            }
+          />
+        )}
         <div>Answer: {JSON.stringify(selections.answer)}</div>
         <div>Answer num: {JSON.stringify(selections.answerNum)}</div>
+        <button
+          onClick={() => {
+            fillGrid(false);
+          }}
+        >
+          Fill grid (incorrect)
+        </button>
+        <button
+          onClick={() => {
+            fillGrid(true);
+          }}
+        >
+          Fill grid (correct)
+        </button>
       </div>
       <div
         style={{

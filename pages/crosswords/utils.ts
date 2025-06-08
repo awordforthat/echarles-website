@@ -97,13 +97,11 @@ export function generateGrid(clues: Clues, gridSize: number): Grid {
       if (i > 0) {
         let prevRow = i;
         for (let k = i; k >= 0; k--) {
-          console.log(grid[`${k},${j}`]);
           if (!grid[`${k},${j}`]) continue;
           prevRow = k;
           break;
         }
         cell.downPrev = rowColToKey(prevRow, j);
-        console.log('cell', cell, 'prev is ', cell.downPrev);
       }
       if (i < gridSize - 1) {
         let nextRow = i;
@@ -248,8 +246,10 @@ export function getNextCellAutoNavigation(
   grid: Grid,
   userContent: Record<string, string | null>
 ): GridCoordinate {
+  if (isGridComplete(userContent)) return { row: 0, col: 0 };
   const advanceVector = direction == 'across' ? [0, 1] : [1, 0];
   let nextCell = currentCell;
+  const currentCellKey = rowColToKey(currentCell.row, currentCell.col);
   // eslint-disable-next-line no-constant-condition
   while (true) {
     nextCell = {
@@ -275,12 +275,12 @@ export function getNextCellAutoNavigation(
     }
 
     const newKey = rowColToKey(nextCell.row, nextCell.col);
-
+    // TODO: if word is not complete, go to the first blank cell in the word.
+    if (newKey == currentCellKey) return { row: 0, col: 0 }; // We've wrapped around to the start, puzzle is done!
     if (!grid[newKey].content) continue; // Cell is black.
     if (userContent[newKey]) continue; // User already entered something.
-    break;
+    return nextCell;
   }
-  return nextCell;
 }
 
 export function getAnswerStartIndexFromNum(
@@ -294,4 +294,38 @@ export function getAnswerStartIndexFromNum(
   if (clueIndex == -1) return 0;
   const ansStartCell = keyToRowCol(clues[clueIndex].key);
   return ansStartCell[direction == 'across' ? 1 : 0];
+}
+
+export function isGridComplete(
+  userContent: Record<string, string | null>
+): boolean {
+  // TODO (maybe): don't brute force it.
+  const anyMissing = Object.values(userContent).some((entry) => entry == null);
+  return !anyMissing;
+}
+
+export function isGridCorrect(
+  userContent: Record<string, string | null>,
+  answers: Grid
+): boolean {
+  // TODO (maybe): don't brute force it.
+  // if (!isGridComplete(userContent)) return false;
+  return Object.keys(userContent).every((key) => {
+    if (!answers[key].content) return true;
+    const result =
+      userContent[key]?.toUpperCase() == answers[key].content.toUpperCase();
+    if (!result) {
+      console.log(
+        'key:',
+        key,
+        'user entry:',
+        userContent[key],
+        'correct answer:',
+        answers[key].content
+      );
+    }
+    return (
+      userContent[key]?.toUpperCase() == answers[key].content.toUpperCase()
+    );
+  });
 }
