@@ -13,7 +13,7 @@ import {
   rowColToKey,
 } from './utils';
 import { useDispatch } from 'react-redux';
-import { NavigationDirection } from './types';
+import { Grid, NavigationDirection, UserContent } from './types';
 import { setDataByCell } from './solutionSlice';
 import { hopskipjumpsolution } from './hopskipjump';
 import { setCellContent } from './userInputSlice';
@@ -22,8 +22,8 @@ import CompletionModal from './puzzleCompleteModal';
 import { showModal, solve, unsolve } from './puzzleStateSlice';
 
 export function Crossword() {
-  const dataByCell = useAppSelector((state) => state.solution.dataByCell);
-  const dataByClue = useAppSelector((state) => state.solution.dataByClue);
+  const answersByCell = useAppSelector((state) => state.solution.dataByCell);
+  const answersByClue = useAppSelector((state) => state.solution.dataByClue);
   const selections = useAppSelector((state) => state.selection);
   const direction = useAppSelector((state) => state.selection.direction);
   const userContent = useAppSelector((state) => state.userContent.grid);
@@ -41,20 +41,27 @@ export function Crossword() {
 
   const fillGrid = React.useCallback(
     (correct: boolean) => {
-      Object.keys(dataByCell.grid).forEach((key) => {
+      Object.keys(answersByCell.grid).forEach((key) => {
         if (correct) {
           dispatch(
             setCellContent({
               cellKey: key,
-              content: dataByCell.grid[key].content ?? '',
+              content: answersByCell.grid[key].answerContent ?? '',
+              answers: answersByCell.grid,
             })
           );
         } else {
-          dispatch(setCellContent({ cellKey: key, content: 'A' }));
+          dispatch(
+            setCellContent({
+              cellKey: key,
+              content: 'A',
+              answers: answersByCell.grid,
+            })
+          );
         }
       });
     },
-    [dataByCell, dispatch]
+    [answersByCell, dispatch]
   );
 
   const handleArrowKeys = React.useCallback(
@@ -92,7 +99,7 @@ export function Crossword() {
       const nextCell = getNextCellManualNavigation(
         currentCell,
         navDirection,
-        dataByCell
+        answersByCell
       );
 
       updateAnswer({ cell: nextCell });
@@ -101,7 +108,7 @@ export function Crossword() {
       direction,
       selections.col,
       selections.row,
-      dataByCell,
+      answersByCell,
       toggleDirection,
       updateAnswer,
     ]
@@ -127,28 +134,35 @@ export function Crossword() {
           setCellContent({
             cellKey: `${selections.row},${selections.col}`,
             content: e.key,
+            answers: answersByCell.grid,
           })
         );
         // Accessing the store directly here ensures that we have
         // the update that was just made, which is used in the auto navigation call.
-        const updatedUserContent = store.getState().userContent.grid;
+        const updatedUserContent: UserContent =
+          store.getState().userContent.grid;
+        console.log(updatedUserContent);
         if (!selections.answer) return;
+
         if (isGridComplete(updatedUserContent)) {
           updateAnswer({ cell: { row: 0, col: 0 } });
           dispatch(showModal({ show: true }));
-          const isWin = isGridCorrect(updatedUserContent, dataByCell.grid);
+          const isWin = isGridCorrect(updatedUserContent, answersByCell.grid);
           if (isWin) {
             dispatch(solve());
-          } else {
-            dispatch(unsolve());
+            return;
           }
-          return;
+          dispatch(unsolve());
+        } else {
+          dispatch(unsolve());
         }
         const nextCellAuto = getNextCellAutoNavigation(
           currentCell,
           direction,
-          dataByCell.grid,
-          updatedUserContent
+          answersByCell.grid,
+          updatedUserContent,
+          answersByClue,
+          answersByCell
         );
         updateAnswer({ cell: nextCellAuto });
 
@@ -158,6 +172,7 @@ export function Crossword() {
       switch (e.code) {
         case 'Space':
           e.preventDefault();
+          e.stopPropagation();
           updateAnswer({ cell: currentCell });
           toggleDirection();
           break;
@@ -166,12 +181,13 @@ export function Crossword() {
             setCellContent({
               cellKey: `${selections.row},${selections.col}`,
               content: '',
+              answers: answersByCell.grid,
             })
           );
           const nextCell = getNextCellManualNavigation(
             currentCell,
             direction == 'across' ? 'left' : 'up',
-            dataByCell
+            answersByCell
           );
           updateAnswer({ cell: nextCell });
       }
@@ -182,8 +198,9 @@ export function Crossword() {
       selections.answer,
       handleArrowKeys,
       dispatch,
+      answersByCell,
       direction,
-      dataByCell,
+      answersByClue,
       updateAnswer,
       toggleDirection,
     ]
@@ -191,15 +208,21 @@ export function Crossword() {
 
   const renderGrid = React.useCallback(() => {
     const rows = [];
-    for (let row = 0; row < dataByCell.gridSize; row++) {
+    for (let row = 0; row < answersByCell.gridSize; row++) {
       const currentRow = [];
-      for (let col = 0; col < dataByCell.gridSize; col++) {
+      for (let col = 0; col < answersByCell.gridSize; col++) {
         const key = rowColToKey(row, col);
-        const cell = dataByCell.grid[key];
+        const cellAnswer = answersByCell.grid[key];
 
-        if (cell?.content == null) {
+        if (cellAnswer?.answerContent == null) {
           currentRow.push(
-            <Cell key={key} row={row} col={col} userContent={null} />
+            <Cell
+              key={key}
+              row={row}
+              col={col}
+              userContent={null}
+              isCorrect={false}
+            />
           );
           continue;
         }
@@ -209,9 +232,10 @@ export function Crossword() {
             key={key}
             row={row}
             col={col}
-            number={cell.number}
-            content={cell?.content}
-            userContent={userContent[key]}
+            uiNum={cellAnswer.uiNum}
+            answerContent={cellAnswer?.answerContent}
+            userContent={userContent[key].content}
+            isCorrect={userContent[key].isCorrect}
           />
         );
       }
@@ -222,9 +246,19 @@ export function Crossword() {
       );
     }
     return rows;
-  }, [dataByCell.grid, dataByCell.gridSize, userContent]);
+  }, [answersByCell.grid, answersByCell.gridSize, userContent]);
   return (
-    <>
+    <div className={styles.page}>
+      <div className={styles.titleContainer}>
+        <div className={styles.title}>
+          <h2>The Crossword</h2>
+          <div className={styles.secondaryTitle}>
+            # {hopskipjumpsolution.index}
+          </div>
+        </div>
+        <div className={styles.byline}>by Emily Wachtel</div>
+      </div>
+
       <div tabIndex={0} className={styles.crossword} onKeyDown={handleKeyDown}>
         {renderGrid()}
         {showCompletionModal && (
@@ -238,9 +272,9 @@ export function Crossword() {
             }
           />
         )}
-        <div>Answer: {JSON.stringify(selections.answer)}</div>
-        <div>Answer num: {JSON.stringify(selections.answerNum)}</div>
+        <div>Solved: {solved}</div>
         <button
+          style={{ width: 100 }}
           onClick={() => {
             fillGrid(false);
           }}
@@ -248,6 +282,7 @@ export function Crossword() {
           Fill grid (incorrect)
         </button>
         <button
+          style={{ width: 100 }}
           onClick={() => {
             fillGrid(true);
           }}
@@ -269,11 +304,11 @@ export function Crossword() {
       >
         <pre style={{ width: '50%' }}>
           Metadata by Cell
-          {JSON.stringify(dataByCell, null, 2)}
+          {JSON.stringify(answersByCell, null, 2)}
         </pre>
         Metadata by Clue
-        <pre>{JSON.stringify(dataByClue, null, 2)}</pre>
+        <pre>{JSON.stringify(answersByClue, null, 2)}</pre>
       </div>
-    </>
+    </div>
   );
 }

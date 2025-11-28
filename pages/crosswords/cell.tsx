@@ -2,20 +2,18 @@ import * as React from 'react';
 import classNames from 'classnames';
 import styles from './crossword.module.scss';
 import { useAppSelector } from './hooks';
-import {
-  answerContainsCell,
-  getContainingAnswer,
-  keyToRowCol,
-  rowColToKey,
-} from './utils';
+import { answerContainsCell } from './utils';
 import { ICell } from './types';
 import { useSelectionUpdates } from './useSelectionUpdates';
 
-export function Cell(props: ICell & { userContent: string | null }) {
-  const { row, col, number, content: answerContent, userContent } = props;
+export function Cell(
+  props: ICell & { userContent: string | null; isCorrect: boolean | null }
+) {
+  const { row, col, answerContent, uiNum, userContent, isCorrect } = props;
   const selectedAnswerKey = useAppSelector(
     (state) => state.selection.answerKey
   );
+
   const selectedCell = useAppSelector((state) => {
     return { row: state.selection.row, col: state.selection.col };
   });
@@ -34,6 +32,7 @@ export function Cell(props: ICell & { userContent: string | null }) {
       ),
     [styles.selected]: selectedCell.row == row && selectedCell.col == col,
     [styles.black]: answerContent == null,
+    [styles.correct]: isCorrect,
   });
 
   return (

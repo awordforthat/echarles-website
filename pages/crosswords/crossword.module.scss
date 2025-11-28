@@ -1,6 +1,34 @@
+@import './themes.scss';
+
 .debug {
   border: 1px solid red !important;
 }
+.page {
+  padding: 3vw;
+}
+
+.titleContainer {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 2rem;
+
+  .title {
+    display: flex;
+    flex-direction: row;
+    font-size: 2rem;
+   
+  }
+   .secondaryTitle {
+      display: flex;
+      align-items: center;
+      color: $gray;   
+      font-size: 2rem;
+      margin-left: 12px;
+      
+    }
+}
+
+
 
 .crossword {
   --cell-size: 35px;
@@ -8,6 +36,10 @@
   display: flex;
   flex-direction: column;
   height: fit-content;
+  width:fit-content;
+  border: 3px solid black;
+
+
 
   .row {
     display: flex;
@@ -34,6 +66,7 @@
 
       .content-container {
         align-items: center;
+        color: red;
         display: flex;
         font-size: 1.5em;
         height: 100%;
@@ -45,6 +78,10 @@
         user-select: none;
         text-transform: uppercase;
       }
+      &.correct {
+        color: green;
+      }
+
       &.selected-secondary {
         background: lightblue;
       }

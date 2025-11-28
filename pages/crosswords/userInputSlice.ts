@@ -1,17 +1,35 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { generateBlankGrid } from './utils';
+import { generateBlankGrid, isCellCorrect } from './utils';
+import { Grid, UserContent } from './types';
 
-const userSolution: Record<string, string | null> = generateBlankGrid(15);
+const userSolution: UserContent = generateBlankGrid(15);
 
 const inputSlice = createSlice({
   name: 'userInput',
-  initialState: { grid: userSolution },
+  initialState: { grid: userSolution, numCorrectCells: 0 },
   reducers: {
     setCellContent: (
       state,
-      action: PayloadAction<{ cellKey: string; content: string }>
+      action: PayloadAction<{
+        cellKey: string;
+        content: string;
+        answers: Grid;
+      }>
     ) => {
-      state.grid[action.payload.cellKey] = action.payload.content;
+      const origCellState = state.grid[action.payload.cellKey];
+      state.grid[action.payload.cellKey].content = action.payload.content;
+
+      const isCorrect = isCellCorrect(
+        action.payload.content,
+        action.payload.cellKey,
+        action.payload.answers
+      );
+      if (!origCellState.isCorrect && isCorrect) {
+        state.numCorrectCells += 1;
+      }
+      if (origCellState.isCorrect && !isCorrect) {
+        state.numCorrectCells -= 1;
+      }
     },
   },
 });

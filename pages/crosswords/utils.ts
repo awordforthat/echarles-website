@@ -1,4 +1,3 @@
-import { hopskipjumpGridSize } from './hopskipjump';
 import {
   Answer,
   Clues,
@@ -8,8 +7,8 @@ import {
   GridCoordinate,
   DataByClue,
   DataByClueAnswerContent,
-  ICell,
   NavigationDirection,
+  UserContent,
 } from './types';
 
 export function keyToRowCol(rowCol: string): Array<number> {
@@ -34,7 +33,7 @@ export function DEBUG_ONLY_generateDownGrid(
       grid[key] = {
         row: row + i,
         col,
-        content: answer.answer[i],
+        answerContent: answer.answer[i],
       };
     }
   }
@@ -55,83 +54,46 @@ export function DEBUG_ONLY_generateDownGrid(
 export function generateGrid(clues: Clues, gridSize: number): Grid {
   const grid: Grid = {};
   if (!clues.across) return {};
-  for (const [rowCol, answer] of Object.entries(clues.across)) {
-    const [row, col] = keyToRowCol(rowCol);
-    for (let i = 0; i < answer.answer.length; i++) {
-      const key = rowColToKey(row, col + i);
-      grid[key] = {
-        row,
-        col: col + i,
-        content: answer.answer[i],
-        number: i == 0 ? answer.number : undefined,
-      };
-    }
-  }
 
-  // TODO:  remove double iteration.
-  // Fill in black cells and missing numbers.
+  let acrossAnswer;
+  let downAnswer;
+  let acrossAnswerKey;
+  let downAnswerKey;
   for (let i = 0; i < gridSize; i++) {
     for (let j = 0; j < gridSize; j++) {
-      const cell = grid[`${i},${j}`];
-      const answerKey = rowColToKey(i, j);
-      if (cell) {
-        const acrossAnswer = clues.across[answerKey];
-        const downAnswer = clues.down[answerKey];
-        if (cell.number == null)
-          cell.number = acrossAnswer?.number ?? downAnswer?.number;
-        continue;
+      const key = rowColToKey(i, j);
+      let answerContent;
+      const isAcrossStart = clues.across[key];
+      const isDownStart = clues.down[key];
+      acrossAnswer = clues.across[key] ?? acrossAnswer;
+      downAnswer = clues.down[key] ?? downAnswer;
+
+      if (clues.across[key]) {
+        acrossAnswerKey = key;
       }
-      grid[answerKey] = {
+      if (clues.down[key]) {
+        downAnswerKey = key;
+      }
+      if (acrossAnswerKey) {
+        const answerStartCol = keyToRowCol(acrossAnswerKey)[1];
+        const offset = j - answerStartCol;
+        answerContent = acrossAnswer.answer[offset];
+      }
+      grid[key] = {
         row: i,
         col: j,
+        acrossAnswerStartKey: downAnswerKey,
+        downAnswerStartKey: acrossAnswerKey,
+        answerContent,
+        uiNum: isAcrossStart
+          ? acrossAnswer.number
+          : isDownStart
+          ? downAnswer.number
+          : undefined,
       };
     }
   }
 
-  // TODO: remove third iteration :(
-  for (let i = 0; i < gridSize; i++) {
-    for (let j = 0; j < gridSize; j++) {
-      // For each cell, calculate the closest cell in the row and column
-      // that isn't the edge of the puzzle and is not black.
-      const cell: ICell = grid[`${i},${j}`];
-      if (i > 0) {
-        let prevRow = i;
-        for (let k = i; k >= 0; k--) {
-          if (!grid[`${k},${j}`]) continue;
-          prevRow = k;
-          break;
-        }
-        cell.downPrev = rowColToKey(prevRow, j);
-      }
-      if (i < gridSize - 1) {
-        let nextRow = i;
-        for (let k = i; k < gridSize; k++) {
-          if (!grid[`${i},${k}`]) continue;
-          nextRow = k;
-          break;
-        }
-        cell.downNext = rowColToKey(nextRow, j);
-      }
-      if (j > 0) {
-        let prevCol = j;
-        for (let k = j; k >= 0; k--) {
-          if (!grid[`${i},${k}`]) continue;
-          prevCol = k;
-          break;
-        }
-        cell.acrossPrev = rowColToKey(i, prevCol);
-      }
-      if (j < gridSize - 1) {
-        let nextCol = j;
-        for (let k = j; k < gridSize; k++) {
-          if (!grid[`${i},${k}`]) continue;
-          nextCol = k;
-          break;
-        }
-        cell.acrossNext = rowColToKey(i, nextCol);
-      }
-    }
-  }
   return grid;
 }
 
@@ -159,13 +121,11 @@ export function generateDataByClue(crossword: Crossword) {
   return result;
 }
 
-export function generateBlankGrid(
-  gridSize: number
-): Record<string, string | null> {
-  const grid: Record<string, string | null> = {};
+export function generateBlankGrid(gridSize: number): UserContent {
+  const grid: UserContent = {};
   for (let i = 0; i < gridSize; i++) {
     for (let j = 0; j < gridSize; j++) {
-      grid[rowColToKey(i, j)] = null;
+      grid[rowColToKey(i, j)] = { content: null, isCorrect: false };
     }
   }
   return grid;
@@ -234,8 +194,8 @@ export function getNextCellManualNavigation(
   if (candidate.row == 0 && candidate.col == 0) return candidate;
 
   // Recursively find next valid cell if current cell is empty
-  return solution.grid[rowColToKey(candidate.row, candidate.col)]?.content ==
-    null
+  return solution.grid[rowColToKey(candidate.row, candidate.col)]
+    ?.answerContent == null
     ? getNextCellManualNavigation(candidate, direction, solution)
     : candidate;
 }
@@ -244,43 +204,25 @@ export function getNextCellAutoNavigation(
   currentCell: GridCoordinate,
   direction: ClueDirection,
   grid: Grid,
-  userContent: Record<string, string | null>
+  userEntries: any,
+  answersByClue: DataByClue,
+  answersByCell: Crossword
 ): GridCoordinate {
-  if (isGridComplete(userContent)) return { row: 0, col: 0 };
-  const advanceVector = direction == 'across' ? [0, 1] : [1, 0];
-  let nextCell = currentCell;
+  if (isGridComplete(userEntries)) return { row: 0, col: 0 };
+  let nextCell = { ...currentCell };
   const currentCellKey = rowColToKey(currentCell.row, currentCell.col);
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    nextCell = {
-      row: nextCell.row + advanceVector[0],
-      col: nextCell.col + advanceVector[1],
-    };
 
-    if (nextCell.col >= hopskipjumpGridSize) {
-      nextCell.col = 0;
-      nextCell.row += 1;
-    }
+  console.log('Grid', grid);
+  console.log('answers by clue', answersByClue);
+  console.log('answers by cell', answersByCell);
+  // If the answer is completely filled in, go to the next clue in direction we're currently going.
+  // If it's incomplete, go to the next unfilled cell in the answer
 
-    if (nextCell.row >= hopskipjumpGridSize) {
-      nextCell.row = 0;
-      nextCell.col += 1;
-    }
+  const newKey = rowColToKey(nextCell.row, nextCell.col);
+  // TODO: if word is not complete, go to the first blank cell in the word.
 
-    if (
-      nextCell.row >= hopskipjumpGridSize ||
-      nextCell.row >= hopskipjumpGridSize
-    ) {
-      nextCell = { row: 0, col: 0 };
-    }
-
-    const newKey = rowColToKey(nextCell.row, nextCell.col);
-    // TODO: if word is not complete, go to the first blank cell in the word.
-    if (newKey == currentCellKey) return { row: 0, col: 0 }; // We've wrapped around to the start, puzzle is done!
-    if (!grid[newKey].content) continue; // Cell is black.
-    if (userContent[newKey]) continue; // User already entered something.
-    return nextCell;
-  }
+  if (newKey == currentCellKey) return { row: 0, col: 0 }; // We've wrapped around to the start, puzzle is done!
+  return nextCell;
 }
 
 export function getAnswerStartIndexFromNum(
@@ -296,36 +238,48 @@ export function getAnswerStartIndexFromNum(
   return ansStartCell[direction == 'across' ? 1 : 0];
 }
 
-export function isGridComplete(
-  userContent: Record<string, string | null>
-): boolean {
+export function isGridComplete(userEntries: UserContent): boolean {
   // TODO (maybe): don't brute force it.
-  const anyMissing = Object.values(userContent).some((entry) => entry == null);
+  const anyMissing = Object.values(userEntries).some(
+    (entry) => entry.content == null
+  );
   return !anyMissing;
 }
 
+export function isCellCorrect(
+  userContent: string,
+  cellKey: string,
+  answers: Grid
+): boolean | null {
+  return userContent == answers[cellKey].answerContent?.toUpperCase();
+}
+
 export function isGridCorrect(
-  userContent: Record<string, string | null>,
+  userEntries: UserContent,
   answers: Grid
 ): boolean {
   // TODO (maybe): don't brute force it.
-  // if (!isGridComplete(userContent)) return false;
-  return Object.keys(userContent).every((key) => {
-    if (!answers[key].content) return true;
-    const result =
-      userContent[key]?.toUpperCase() == answers[key].content.toUpperCase();
-    if (!result) {
-      console.log(
-        'key:',
-        key,
-        'user entry:',
-        userContent[key],
-        'correct answer:',
-        answers[key].content
-      );
-    }
+  if (!isGridComplete(userEntries)) return false;
+  return Object.keys(userEntries).every((key) => {
+    if (!answers[key].answerContent) return true;
+    // const result =
+    //   userEntries[key]?.content?.toUpperCase() ==
+    //   answers[key].content.toUpperCase();
+    // if (!result) {
+    //   console.log(
+    //     'key:',
+    //     key,
+    //     'user entry:',
+    //     userEntries[key],
+    //     'correct answer:',
+    //     answers[key].content
+    //   );
+    // }
+
+    // TODO: use isCellCorrect
     return (
-      userContent[key]?.toUpperCase() == answers[key].content.toUpperCase()
+      userEntries[key]?.content?.toUpperCase() ==
+      answers[key].answerContent.toUpperCase()
     );
   });
 }

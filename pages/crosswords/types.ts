@@ -6,6 +6,7 @@ export type Answer = {
 };
 
 export type Grid = Record<string, ICell>;
+
 export type Clues = {
   across: Record<string, Answer>;
   down: Record<string, Answer>;
@@ -15,6 +16,7 @@ export type Crossword = {
   gridSize: number;
   grid: Grid;
   clues: Clues;
+  index: number;
 };
 
 export type DataByClueAnswerContent = {
@@ -23,6 +25,14 @@ export type DataByClueAnswerContent = {
   answer: string;
   key: string;
 };
+
+export type UserContent = Record<
+  string,
+  {
+    content: string | null;
+    isCorrect: boolean | null;
+  }
+>;
 
 export type DataByClue = {
   across: DataByClueAnswerContent[];
@@ -35,12 +45,12 @@ export type GridCoordinate = {
 };
 
 export type ICell = GridCoordinate & {
-  content?: string; // undefined for black cells
-  number?: number;
-  acrossPrev?: string;
-  acrossNext?: string;
-  downPrev?: string;
-  downNext?: string;
+  answerContent?: string; // undefined for black cells
+  acrossAnswerNum?: number;
+  downAnswerNum?: number;
+  acrossAnswerStartKey?: string;
+  downAnswerStartKey?: string;
+  uiNum?: number;
 };
 
 export type ClueDirection = 'across' | 'down';

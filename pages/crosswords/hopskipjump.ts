@@ -104,7 +104,7 @@ export const hopskipjumpclues: Clues = {
       linkedAnswers: [{ key: '6,0', direction: 'across' }],
     },
 
-    '6, 10': {
+    '6,10': {
       clue: 'Smoky pepper',
       answer: 'ANCHO',
       number: 37,
@@ -463,4 +463,5 @@ export const hopskipjumpsolution: Crossword = {
   gridSize: hopskipjumpGridSize,
   grid: generateGrid(hopskipjumpclues, hopskipjumpGridSize),
   clues: hopskipjumpclues,
+  index: 1,
 };
