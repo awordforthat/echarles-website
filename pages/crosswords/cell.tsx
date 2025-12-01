@@ -47,7 +47,7 @@ export function Cell(
         updateAnswer({ cell: { row, col } });
       }}
     >
-      <div className={styles['number-container']}>{number}</div>
+      <div className={styles['number-container']}>{uiNum}</div>
       <div className={styles['content-container']}>{userContent?.[0]}</div>
     </div>
   );

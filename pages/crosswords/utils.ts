@@ -58,7 +58,6 @@ export function generateGrid(clues: Clues, gridSize: number): Grid {
   let acrossAnswer;
   let downAnswer;
   let acrossAnswerKey;
-  let downAnswerKey;
   for (let i = 0; i < gridSize; i++) {
     for (let j = 0; j < gridSize; j++) {
       const key = rowColToKey(i, j);
@@ -71,9 +70,7 @@ export function generateGrid(clues: Clues, gridSize: number): Grid {
       if (clues.across[key]) {
         acrossAnswerKey = key;
       }
-      if (clues.down[key]) {
-        downAnswerKey = key;
-      }
+
       if (acrossAnswerKey) {
         const answerStartCol = keyToRowCol(acrossAnswerKey)[1];
         const offset = j - answerStartCol;
@@ -82,8 +79,7 @@ export function generateGrid(clues: Clues, gridSize: number): Grid {
       grid[key] = {
         row: i,
         col: j,
-        acrossAnswerStartKey: downAnswerKey,
-        downAnswerStartKey: acrossAnswerKey,
+        acrossAnswerStartKey: acrossAnswerKey,
         answerContent,
         uiNum: isAcrossStart
           ? acrossAnswer.number
@@ -94,6 +90,29 @@ export function generateGrid(clues: Clues, gridSize: number): Grid {
     }
   }
 
+  // TODO: remove double iteration
+  let downAnswerKey;
+  for (let j = 0; j < gridSize; j++) {
+    for (let i = 0; i < gridSize; i++) {
+      const key = rowColToKey(i, j);
+      let answerContent;
+      downAnswer = clues.down[key] ?? downAnswer;
+
+      if (clues.down[key]) {
+        downAnswerKey = key;
+      }
+
+      if (downAnswerKey) {
+        const answerStartRow = keyToRowCol(downAnswerKey)[0];
+        const offset = i - answerStartRow;
+        answerContent = downAnswer.answer[offset];
+      }
+
+      grid[key].downAnswerStartKey = downAnswerKey;
+      grid[key].answerContent = answerContent;
+    }
+  }
+  console.log(grid);
   return grid;
 }
 
@@ -201,27 +220,56 @@ export function getNextCellManualNavigation(
 }
 
 export function getNextCellAutoNavigation(
-  currentCell: GridCoordinate,
+  currentCellRowCol: GridCoordinate,
   direction: ClueDirection,
-  grid: Grid,
   userEntries: any,
   answersByClue: DataByClue,
-  answersByCell: Crossword
+  crosswordDef: Crossword
 ): GridCoordinate {
-  if (isGridComplete(userEntries)) return { row: 0, col: 0 };
-  let nextCell = { ...currentCell };
-  const currentCellKey = rowColToKey(currentCell.row, currentCell.col);
-
-  console.log('Grid', grid);
+  // if (isGridComplete(userEntries)) return { row: 0, col: 0 };
   console.log('answers by clue', answersByClue);
-  console.log('answers by cell', answersByCell);
-  // If the answer is completely filled in, go to the next clue in direction we're currently going.
-  // If it's incomplete, go to the next unfilled cell in the answer
+  let nextCell = { ...currentCellRowCol };
+  const currentCellKey = rowColToKey(
+    currentCellRowCol.row,
+    currentCellRowCol.col
+  );
+  const cell = crosswordDef.grid[currentCellKey];
+  const answerStartKey =
+    direction == 'across' ? cell.acrossAnswerStartKey : cell.downAnswerStartKey;
+  if (answerStartKey) {
+    const [answerStartRow, answerStartCol] = keyToRowCol(answerStartKey);
+    const answer = crosswordDef.clues[direction][answerStartKey]?.answer;
 
-  const newKey = rowColToKey(nextCell.row, nextCell.col);
+    const currentIndex =
+      direction == 'across'
+        ? currentCellRowCol.col - answerStartCol
+        : currentCellRowCol.row - answerStartRow;
+    for (let i = (currentIndex + 1) % answer.length; i < answer.length; i++) {
+      const key =
+        direction == 'across'
+          ? rowColToKey(answerStartRow, answerStartCol + i)
+          : rowColToKey(answerStartRow + i, answerStartCol);
+      if (userEntries[key].content) continue;
+      const [resultRow, resultCol] = keyToRowCol(key);
+      return { row: resultRow, col: resultCol };
+    }
+
+    console.log('completed word');
+    // We completed the word. Move on to the next clue. (TODO)
+    return { row: 7, col: 7 };
+  }
+
+  // console.log('Grid', grid);
+
+  // console.log('answers by cell', crosswordDef);
+  // console.log('user entries', userEntries);
+
+  // If the answer is completely filled in, go to the next clue in direction we're currently going.
+  // If it's incomplete, go to the next unfilled cell in the answer.
+
   // TODO: if word is not complete, go to the first blank cell in the word.
 
-  if (newKey == currentCellKey) return { row: 0, col: 0 }; // We've wrapped around to the start, puzzle is done!
+  // if (newKey == currentCellRowCol) return { row: 0, col: 0 }; // We've wrapped around to the start, puzzle is done!
   return nextCell;
 }
 

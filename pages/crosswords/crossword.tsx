@@ -141,7 +141,6 @@ export function Crossword() {
         // the update that was just made, which is used in the auto navigation call.
         const updatedUserContent: UserContent =
           store.getState().userContent.grid;
-        console.log(updatedUserContent);
         if (!selections.answer) return;
 
         if (isGridComplete(updatedUserContent)) {
@@ -159,7 +158,6 @@ export function Crossword() {
         const nextCellAuto = getNextCellAutoNavigation(
           currentCell,
           direction,
-          answersByCell.grid,
           updatedUserContent,
           answersByClue,
           answersByCell
