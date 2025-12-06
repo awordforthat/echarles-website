@@ -18,12 +18,12 @@ const inputSlice = createSlice({
     ) => {
       const origCellState = state.grid[action.payload.cellKey];
       state.grid[action.payload.cellKey].content = action.payload.content;
-
       const isCorrect = isCellCorrect(
         action.payload.content,
         action.payload.cellKey,
         action.payload.answers
       );
+      state.grid[action.payload.cellKey].isCorrect = isCorrect;
       if (!origCellState.isCorrect && isCorrect) {
         state.numCorrectCells += 1;
       }

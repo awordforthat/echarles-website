@@ -319,7 +319,9 @@ export function isCellCorrect(
   cellKey: string,
   answers: Grid
 ): boolean | null {
-  return userContent == answers[cellKey].answerContent?.toUpperCase();
+  return (
+    userContent.toUpperCase() == answers[cellKey].answerContent?.toUpperCase()
+  );
 }
 
 export function isGridCorrect(

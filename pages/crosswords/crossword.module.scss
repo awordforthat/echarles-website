@@ -56,6 +56,7 @@
 
       .number-container {
         display: flex;
+        color: black;
         font-size: 0.75em;
         height: 100%;
         position: absolute;
@@ -66,7 +67,6 @@
 
       .content-container {
         align-items: center;
-        color: red;
         display: flex;
         font-size: 1.5em;
         height: 100%;
@@ -78,8 +78,8 @@
         user-select: none;
         text-transform: uppercase;
       }
-      &.correct {
-        color: green;
+      &.wrong {
+        color: red;
       }
 
       &.selected-secondary {

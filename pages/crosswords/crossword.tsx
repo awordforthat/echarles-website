@@ -13,7 +13,7 @@ import {
   rowColToKey,
 } from './utils';
 import { useDispatch } from 'react-redux';
-import { Grid, NavigationDirection, UserContent } from './types';
+import { NavigationDirection, UserContent } from './types';
 import { setDataByCell } from './solutionSlice';
 import { hopskipjumpsolution } from './hopskipjump';
 import { setCellContent } from './userInputSlice';
@@ -26,7 +26,7 @@ export function Crossword() {
   const answersByClue = useAppSelector((state) => state.solution.dataByClue);
   const selections = useAppSelector((state) => state.selection);
   const direction = useAppSelector((state) => state.selection.direction);
-  const userContent = useAppSelector((state) => state.userContent.grid);
+
   const showCompletionModal = useAppSelector(
     (state) => state.puzzleState.showModal
   );
@@ -213,18 +213,9 @@ export function Crossword() {
         const cellAnswer = crosswordDef.grid[key];
 
         if (cellAnswer?.answerContent == null) {
-          currentRow.push(
-            <Cell
-              key={key}
-              row={row}
-              col={col}
-              userContent={null}
-              isCorrect={false}
-            />
-          );
+          currentRow.push(<Cell key={key} row={row} col={col} />);
           continue;
         }
-
         currentRow.push(
           <Cell
             key={key}
@@ -232,8 +223,6 @@ export function Crossword() {
             col={col}
             uiNum={cellAnswer.uiNum}
             answerContent={cellAnswer?.answerContent}
-            userContent={userContent[key].content}
-            isCorrect={userContent[key].isCorrect}
           />
         );
       }
@@ -244,7 +233,7 @@ export function Crossword() {
       );
     }
     return rows;
-  }, [crosswordDef.grid, crosswordDef.gridSize, userContent]);
+  }, [crosswordDef.grid, crosswordDef.gridSize]);
   return (
     <div className={styles.page}>
       <div className={styles.titleContainer}>
