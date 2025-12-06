@@ -22,7 +22,7 @@ import CompletionModal from './puzzleCompleteModal';
 import { showModal, solve, unsolve } from './puzzleStateSlice';
 
 export function Crossword() {
-  const answersByCell = useAppSelector((state) => state.solution.dataByCell);
+  const crosswordDef = useAppSelector((state) => state.solution.dataByCell);
   const answersByClue = useAppSelector((state) => state.solution.dataByClue);
   const selections = useAppSelector((state) => state.selection);
   const direction = useAppSelector((state) => state.selection.direction);
@@ -41,13 +41,13 @@ export function Crossword() {
 
   const fillGrid = React.useCallback(
     (correct: boolean) => {
-      Object.keys(answersByCell.grid).forEach((key) => {
+      Object.keys(crosswordDef.grid).forEach((key) => {
         if (correct) {
           dispatch(
             setCellContent({
               cellKey: key,
-              content: answersByCell.grid[key].answerContent ?? '',
-              answers: answersByCell.grid,
+              content: crosswordDef.grid[key].answerContent ?? '',
+              answers: crosswordDef.grid,
             })
           );
         } else {
@@ -55,13 +55,13 @@ export function Crossword() {
             setCellContent({
               cellKey: key,
               content: 'A',
-              answers: answersByCell.grid,
+              answers: crosswordDef.grid,
             })
           );
         }
       });
     },
-    [answersByCell, dispatch]
+    [crosswordDef, dispatch]
   );
 
   const handleArrowKeys = React.useCallback(
@@ -99,7 +99,7 @@ export function Crossword() {
       const nextCell = getNextCellManualNavigation(
         currentCell,
         navDirection,
-        answersByCell
+        crosswordDef
       );
 
       updateAnswer({ cell: nextCell });
@@ -108,7 +108,7 @@ export function Crossword() {
       direction,
       selections.col,
       selections.row,
-      answersByCell,
+      crosswordDef,
       toggleDirection,
       updateAnswer,
     ]
@@ -134,7 +134,7 @@ export function Crossword() {
           setCellContent({
             cellKey: `${selections.row},${selections.col}`,
             content: e.key,
-            answers: answersByCell.grid,
+            answers: crosswordDef.grid,
           })
         );
         // Accessing the store directly here ensures that we have
@@ -146,7 +146,7 @@ export function Crossword() {
         if (isGridComplete(updatedUserContent)) {
           updateAnswer({ cell: { row: 0, col: 0 } });
           dispatch(showModal({ show: true }));
-          const isWin = isGridCorrect(updatedUserContent, answersByCell.grid);
+          const isWin = isGridCorrect(updatedUserContent, crosswordDef.grid);
           if (isWin) {
             dispatch(solve());
             return;
@@ -159,8 +159,8 @@ export function Crossword() {
           currentCell,
           direction,
           updatedUserContent,
-          answersByClue,
-          answersByCell
+          crosswordDef,
+          answersByClue
         );
         updateAnswer({ cell: nextCellAuto });
 
@@ -179,13 +179,13 @@ export function Crossword() {
             setCellContent({
               cellKey: `${selections.row},${selections.col}`,
               content: '',
-              answers: answersByCell.grid,
+              answers: crosswordDef.grid,
             })
           );
           const nextCell = getNextCellManualNavigation(
             currentCell,
             direction == 'across' ? 'left' : 'up',
-            answersByCell
+            crosswordDef
           );
           updateAnswer({ cell: nextCell });
       }
@@ -196,7 +196,7 @@ export function Crossword() {
       selections.answer,
       handleArrowKeys,
       dispatch,
-      answersByCell,
+      crosswordDef,
       direction,
       answersByClue,
       updateAnswer,
@@ -206,11 +206,11 @@ export function Crossword() {
 
   const renderGrid = React.useCallback(() => {
     const rows = [];
-    for (let row = 0; row < answersByCell.gridSize; row++) {
+    for (let row = 0; row < crosswordDef.gridSize; row++) {
       const currentRow = [];
-      for (let col = 0; col < answersByCell.gridSize; col++) {
+      for (let col = 0; col < crosswordDef.gridSize; col++) {
         const key = rowColToKey(row, col);
-        const cellAnswer = answersByCell.grid[key];
+        const cellAnswer = crosswordDef.grid[key];
 
         if (cellAnswer?.answerContent == null) {
           currentRow.push(
@@ -244,7 +244,7 @@ export function Crossword() {
       );
     }
     return rows;
-  }, [answersByCell.grid, answersByCell.gridSize, userContent]);
+  }, [crosswordDef.grid, crosswordDef.gridSize, userContent]);
   return (
     <div className={styles.page}>
       <div className={styles.titleContainer}>
@@ -302,7 +302,7 @@ export function Crossword() {
       >
         <pre style={{ width: '50%' }}>
           Metadata by Cell
-          {JSON.stringify(answersByCell, null, 2)}
+          {JSON.stringify(crosswordDef, null, 2)}
         </pre>
         Metadata by Clue
         <pre>{JSON.stringify(answersByClue, null, 2)}</pre>

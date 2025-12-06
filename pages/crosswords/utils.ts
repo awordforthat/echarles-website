@@ -112,7 +112,7 @@ export function generateGrid(clues: Clues, gridSize: number): Grid {
       grid[key].answerContent = answerContent;
     }
   }
-  console.log(grid);
+
   return grid;
 }
 
@@ -121,20 +121,34 @@ export function generateDataByClue(crossword: Crossword) {
     across: [],
     down: [],
   };
-  for (const [key, answer] of Object.entries(crossword.clues.across)) {
+  const acrossArray = [...Object.entries(crossword.clues.across)];
+  const downArray = [...Object.entries(crossword.clues.down)];
+
+  for (let i = 0; i < acrossArray.length; i++) {
+    const [key, answer] = acrossArray[i];
+    const nextIndex = (i + 1) % acrossArray.length;
+    const prevIndex = i > 0 ? i - 1 : acrossArray.length - 1;
     result.across.push({
       number: answer.number,
       clue: answer.clue,
       answer: answer.answer,
       key,
+      nextAnswerKey: acrossArray[nextIndex][0],
+      prevAnswerKey: acrossArray[prevIndex][0],
     });
   }
-  for (const [key, answer] of Object.entries(crossword.clues.down)) {
+
+  for (let j = 0; j < downArray.length; j++) {
+    const [key, answer] = downArray[j];
+    const nextIndex = (j + 1) % downArray.length;
+    const prevIndex = j > 0 ? j - 1 : downArray.length - 1;
     result.down.push({
       number: answer.number,
       clue: answer.clue,
       answer: answer.answer,
       key,
+      nextAnswerKey: downArray[nextIndex][0],
+      prevAnswerKey: downArray[prevIndex][0],
     });
   }
   return result;
@@ -223,11 +237,9 @@ export function getNextCellAutoNavigation(
   currentCellRowCol: GridCoordinate,
   direction: ClueDirection,
   userEntries: any,
-  answersByClue: DataByClue,
-  crosswordDef: Crossword
+  crosswordDef: Crossword,
+  answersByClue: DataByClue
 ): GridCoordinate {
-  // if (isGridComplete(userEntries)) return { row: 0, col: 0 };
-  console.log('answers by clue', answersByClue);
   let nextCell = { ...currentCellRowCol };
   const currentCellKey = rowColToKey(
     currentCellRowCol.row,
@@ -254,22 +266,30 @@ export function getNextCellAutoNavigation(
       return { row: resultRow, col: resultCol };
     }
 
-    console.log('completed word');
-    // We completed the word. Move on to the next clue. (TODO)
-    return { row: 7, col: 7 };
+    let currentDirClues = answersByClue[direction];
+
+    // Go to the next clue in this direction. We've pre-calculated this.
+    for (let i = 0; i < currentDirClues.length; i++) {
+      if (currentDirClues[i].key == answerStartKey) {
+        const nextAnswerKey =
+          currentDirClues[(i + 1) % currentDirClues.length].key;
+        const [nextRow, nextCol] = keyToRowCol(nextAnswerKey);
+
+        if (!userEntries[nextAnswerKey].content)
+          return { row: nextRow, col: nextCol };
+        return getNextCellAutoNavigation(
+          { row: nextRow, col: nextCol },
+          direction,
+          userEntries,
+          crosswordDef,
+          answersByClue
+        );
+      }
+    }
+
+    return { row: 0, col: 0 };
   }
 
-  // console.log('Grid', grid);
-
-  // console.log('answers by cell', crosswordDef);
-  // console.log('user entries', userEntries);
-
-  // If the answer is completely filled in, go to the next clue in direction we're currently going.
-  // If it's incomplete, go to the next unfilled cell in the answer.
-
-  // TODO: if word is not complete, go to the first blank cell in the word.
-
-  // if (newKey == currentCellRowCol) return { row: 0, col: 0 }; // We've wrapped around to the start, puzzle is done!
   return nextCell;
 }
 

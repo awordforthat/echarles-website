@@ -24,6 +24,8 @@ export type DataByClueAnswerContent = {
   clue: string;
   answer: string;
   key: string;
+  nextAnswerKey: string;
+  prevAnswerKey: string;
 };
 
 export type UserContent = Record<
