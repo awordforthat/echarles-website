@@ -20,6 +20,7 @@ import { setCellContent } from './userInputSlice';
 import { store } from './store';
 import CompletionModal from './puzzleCompleteModal';
 import { showModal, solve, unsolve } from './puzzleStateSlice';
+import { ClueContainer } from './clueContainer';
 
 export function Crossword() {
   const crosswordDef = useAppSelector((state) => state.solution.dataByCell);
@@ -141,6 +142,7 @@ export function Crossword() {
         // the update that was just made, which is used in the auto navigation call.
         const updatedUserContent: UserContent =
           store.getState().userContent.grid;
+
         if (!selections.answer) return;
 
         if (isGridComplete(updatedUserContent)) {
@@ -204,6 +206,7 @@ export function Crossword() {
     ]
   );
 
+  // TODO: extract to separate component.
   const renderGrid = React.useCallback(() => {
     const rows = [];
     for (let row = 0; row < crosswordDef.gridSize; row++) {
@@ -246,55 +249,49 @@ export function Crossword() {
         <div className={styles.byline}>by Emily Wachtel</div>
       </div>
 
-      <div tabIndex={0} className={styles.crossword} onKeyDown={handleKeyDown}>
-        {renderGrid()}
-        {showCompletionModal && (
-          <CompletionModal
-            onClose={() => {
-              dispatch(showModal({ show: false }));
+      <div className={styles.contentPositioner}>
+        <div>
+          <div className={styles.currentClue}>{selections.answer?.clue}</div>
+          <div
+            tabIndex={0}
+            className={styles.crossword}
+            onKeyDown={handleKeyDown}
+          >
+            {renderGrid()}
+            {showCompletionModal && (
+              <CompletionModal
+                onClose={() => {
+                  dispatch(showModal({ show: false }));
+                }}
+                title={solved ? 'Solved!' : 'Not yet'}
+                message={
+                  solved ? 'Nicely done!' : "Hmm, something's still amiss..."
+                }
+              />
+            )}
+            {/* <div>Solved: {solved}</div>
+          <button
+            style={{ width: 100 }}
+            onClick={() => {
+              fillGrid(false);
             }}
-            title={solved ? 'Solved!' : 'Not yet'}
-            message={
-              solved ? 'Nicely done!' : "Hmm, something's still amiss..."
-            }
-          />
-        )}
-        <div>Solved: {solved}</div>
-        <button
-          style={{ width: 100 }}
-          onClick={() => {
-            fillGrid(false);
-          }}
-        >
-          Fill grid (incorrect)
-        </button>
-        <button
-          style={{ width: 100 }}
-          onClick={() => {
-            fillGrid(true);
-          }}
-        >
-          Fill grid (correct)
-        </button>
-      </div>
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: -50,
-          width: '40vw',
-          margin: '1em',
-          display: 'flex',
-          flexDirection: 'row',
-          border: '1px solid black',
-        }}
-      >
-        <pre style={{ width: '50%' }}>
-          Metadata by Cell
-          {JSON.stringify(crosswordDef, null, 2)}
-        </pre>
-        Metadata by Clue
-        <pre>{JSON.stringify(answersByClue, null, 2)}</pre>
+          >
+            Fill grid (incorrect)
+          </button>
+          <button
+            style={{ width: 100 }}
+            onClick={() => {
+              fillGrid(true);
+            }}
+          >
+            Fill grid (correct)
+          </button> */}
+          </div>
+        </div>
+        <div className={styles.clueContainerContainer}>
+          <ClueContainer direction={'across'} />
+          <ClueContainer direction={'down'} />
+        </div>
       </div>
     </div>
   );

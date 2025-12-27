@@ -32,11 +32,11 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "lint-staged": "^10.4.0",
     "prettier": "^2.4.1",
-    "stylelint": "^16.15.0",
+    "stylelint": "14",
     "stylelint-config-recommended": "^5.0.0",
     "stylelint-order": "^4.1.0",
     "stylelint-prettier": "^1.1.2",
-    "stylelint-scss": "^3.21.0",
+    "stylelint-scss": "^6.13.0",
     "typescript": "^5.8.2",
     "webpack": "^5.98.0"
   }
