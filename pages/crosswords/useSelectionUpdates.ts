@@ -21,7 +21,6 @@ export function useSelectionUpdates() {
       const nextDir = params.direction ?? direction;
 
       if (nextRow == null || nextCol == null) return;
-
       const result = getContainingAnswer(nextRow, nextCol, nextDir, clues);
       if (!result) return;
 

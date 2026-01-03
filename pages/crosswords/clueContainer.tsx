@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { ClueDirection } from './types';
+import { ClueDirection, DataByClueAnswerContent } from './types';
 import { useAppSelector } from './hooks';
 
 import styles from './crossword.module.scss';
@@ -22,7 +22,7 @@ interface IClueProps {
   // eslint-disable-next-line no-unused-vars
   onClick: (rowNum: number, colNum: number) => void;
 }
-const Clue = React.memo(function Clue(props: IClueProps) {
+const Clue = React.memo(function Clue(props: Omit<IClueProps, 'direction'>) {
   const {
     number,
     rowNum,
@@ -50,6 +50,107 @@ const Clue = React.memo(function Clue(props: IClueProps) {
   );
 });
 
+const ClueWrapper = React.memo(
+  function ClueRow({
+    clue,
+    direction,
+    selectedAnswerKey,
+    selectedDirection,
+    selectedAnswerNum,
+    onClick,
+    setSelectedRef,
+  }: {
+    clue: DataByClueAnswerContent;
+    direction: ClueDirection;
+    selectedAnswerKey: string | null;
+    selectedDirection: ClueDirection;
+    selectedAnswerNum: number | null;
+    // eslint-disable-next-line no-unused-vars
+    onClick: (row: number, col: number) => void;
+    // eslint-disable-next-line no-unused-vars
+    setSelectedRef: (el: HTMLDivElement | null) => void;
+  }) {
+    const [rowNum, colNum] = keyToRowCol(clue.key);
+
+    const selectedPrimary =
+      clue.number === selectedAnswerNum && direction === selectedDirection;
+
+    const isSelected =
+      clue.key === selectedAnswerKey && direction === selectedDirection;
+
+    return (
+      <div ref={isSelected ? setSelectedRef : null}>
+        <Clue
+          number={clue.number}
+          rowNum={rowNum}
+          colNum={colNum}
+          text={clue.clue}
+          selectedPrimary={selectedPrimary}
+          selectedSecondary={false}
+          onClick={onClick}
+        />
+      </div>
+    );
+  },
+  (prev, next) => {
+    if (prev.clue !== next.clue) return false; // clue object identity changed
+    const prevIsSelected =
+      prev.clue.key === prev.selectedAnswerKey &&
+      prev.direction === prev.selectedDirection;
+    const nextIsSelected =
+      next.clue.key === next.selectedAnswerKey &&
+      next.direction === next.selectedDirection;
+
+    const prevPrimary =
+      prev.clue.number === prev.selectedAnswerNum &&
+      prev.direction === prev.selectedDirection;
+    const nextPrimary =
+      next.clue.number === next.selectedAnswerNum &&
+      next.direction === next.selectedDirection;
+
+    return (
+      prevIsSelected === nextIsSelected &&
+      prevPrimary === nextPrimary &&
+      prev.onClick === next.onClick
+    );
+  }
+);
+
+const ClueList = React.memo(function ClueList({
+  clues,
+  direction,
+  selectedAnswerKey,
+  selectedAnswerNum,
+  onClick,
+  setSelectedRef,
+}: {
+  clues: DataByClueAnswerContent[];
+  direction: ClueDirection;
+  selectedAnswerKey: string | null;
+  selectedAnswerNum: number | null;
+  // eslint-disable-next-line no-unused-vars
+  onClick: (row: number, col: number) => void;
+  // eslint-disable-next-line no-unused-vars
+  setSelectedRef: (el: HTMLDivElement) => void;
+}) {
+  return (
+    <>
+      {clues.map((clue) => (
+        <ClueWrapper
+          key={clue.key}
+          clue={clue}
+          direction={direction}
+          selectedAnswerKey={selectedAnswerKey}
+          selectedDirection={direction}
+          selectedAnswerNum={selectedAnswerNum}
+          onClick={onClick}
+          setSelectedRef={setSelectedRef}
+        />
+      ))}
+    </>
+  );
+});
+
 export function ClueContainer({ direction }: IClueContainerProps) {
   const clues = useAppSelector((s) => s.solution.dataByClue[direction]);
 
@@ -58,6 +159,9 @@ export function ClueContainer({ direction }: IClueContainerProps) {
   const selectedAnswerNum = useAppSelector((s) => s.selection.answerNum);
 
   const selectedRef = useRef<HTMLDivElement | null>(null);
+  const setSelectedRef = useCallback((el: HTMLDivElement | null) => {
+    selectedRef.current = el;
+  }, []);
 
   useEffect(() => {
     if (selectedDirection !== direction) return;
@@ -66,7 +170,7 @@ export function ClueContainer({ direction }: IClueContainerProps) {
     el.scrollIntoView({
       block: 'nearest',
       inline: 'nearest',
-      behavior: 'auto',
+      behavior: 'smooth',
     });
   }, [selectedAnswerKey, selectedDirection, direction]);
 
@@ -83,31 +187,14 @@ export function ClueContainer({ direction }: IClueContainerProps) {
     <div className={styles.clueContainer}>
       <div className={styles.title}>{direction}</div>
       <div className={styles.scrollable}>
-        {clues.map((c) => {
-          const [rowNum, colNum] = keyToRowCol(c.key);
-          const id = `clue-${c.key}-${direction}`;
-
-          const isSelected =
-            c.key === selectedAnswerKey && direction === selectedDirection;
-
-          return (
-            <div key={id} ref={isSelected ? selectedRef : null}>
-              <Clue
-                direction={direction}
-                number={c.number}
-                rowNum={rowNum}
-                colNum={colNum}
-                text={c.clue}
-                selectedPrimary={
-                  c.number === selectedAnswerNum &&
-                  direction === selectedDirection
-                }
-                selectedSecondary={false}
-                onClick={handleClueClick}
-              />
-            </div>
-          );
-        })}
+        <ClueList
+          clues={clues}
+          direction={direction}
+          selectedAnswerKey={selectedAnswerKey}
+          selectedAnswerNum={selectedAnswerNum}
+          onClick={handleClueClick}
+          setSelectedRef={setSelectedRef}
+        />
       </div>
     </div>
   );
