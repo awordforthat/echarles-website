@@ -10,6 +10,7 @@ import {
   getNextCellManualNavigation,
   isGridComplete,
   isGridCorrect,
+  keyToRowCol,
   rowColToKey,
 } from './utils';
 import { useDispatch } from 'react-redux';
@@ -27,14 +28,37 @@ export function Crossword() {
   const answersByClue = useAppSelector((state) => state.solution.dataByClue);
   const selections = useAppSelector((state) => state.selection);
   const direction = useAppSelector((state) => state.selection.direction);
+  const dataByCell = useAppSelector((s) => s.solution.dataByCell);
+  const solved = useAppSelector((state) => state.puzzleState.solved);
+
+  const selectedRow = useAppSelector((s) => s.selection.row);
+  const selectedCol = useAppSelector((s) => s.selection.col);
 
   const showCompletionModal = useAppSelector(
     (state) => state.puzzleState.showModal
   );
-  const solved = useAppSelector((state) => state.puzzleState.solved);
 
   const dispatch = useDispatch();
   const { updateAnswer, toggleDirection } = useSelectionUpdates();
+
+  const selectedAnswerKey = useAppSelector((s) => s.selection.answerKey);
+
+  const secondarySet = React.useMemo(() => {
+    if (!selectedAnswerKey) return new Set<string>();
+    const [selectedRow, selectedCol] = keyToRowCol(selectedAnswerKey);
+    const clue = dataByCell.clues[direction][selectedAnswerKey];
+    const keys = new Set<string>();
+    let counter = 0;
+    for (const _ of clue.answer) {
+      if (direction === 'across') {
+        keys.add(rowColToKey(selectedRow, selectedCol + counter));
+      } else {
+        keys.add(rowColToKey(selectedRow + counter, selectedCol));
+      }
+      counter++;
+    }
+    return keys;
+  }, [selectedAnswerKey, direction, dataByCell]);
 
   React.useEffect(() => {
     dispatch(setDataByCell(hopskipjumpsolution));
@@ -216,8 +240,19 @@ export function Crossword() {
         const cellAnswer = crosswordDef.grid[key];
 
         if (cellAnswer?.answerContent == null) {
-          currentRow.push(<Cell key={key} row={row} col={col} />);
+          currentRow.push(
+            <Cell
+              key={key}
+              row={row}
+              col={col}
+              isSelected={false}
+              isSecondary={false}
+              onClick={() => {}}
+            />
+          );
         } else {
+          const isSelected = row === selectedRow && col === selectedCol;
+
           currentRow.push(
             <Cell
               key={key}
@@ -225,6 +260,12 @@ export function Crossword() {
               col={col}
               uiNum={cellAnswer.uiNum}
               answerContent={cellAnswer.answerContent}
+              isSelected={isSelected}
+              isSecondary={Boolean(secondarySet && secondarySet.has(key))}
+              onClick={() => {
+                if (isSelected) toggleDirection();
+                else updateAnswer({ cell: { row, col } });
+              }}
             />
           );
         }
@@ -236,7 +277,7 @@ export function Crossword() {
       );
     }
     return rows;
-  }, [crosswordDef.grid, crosswordDef.gridSize]);
+  }, [crosswordDef.grid, crosswordDef.gridSize, secondarySet]);
 
   return (
     <div className={styles.page}>

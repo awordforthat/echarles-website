@@ -24,33 +24,11 @@ const selectionSlice = createSlice({
   name: 'selection',
   initialState,
   reducers: {
-    setSelectedCell: (
-      state,
-      action: PayloadAction<{ row: number; col: number }>
-    ) => {
-      state.row = action.payload.row;
-      state.col = action.payload.col;
-    },
-    setSelectedAnswer: (state, action: PayloadAction<Answer>) => {
-      state.answer = action.payload;
-    },
-    setSelectedAnswerNum: (state, action: PayloadAction<number>) => {
-      state.answerNum = action.payload;
-    },
-    setSelectedAnswerKey: (state, action: PayloadAction<string>) => {
-      state.answerKey = action.payload;
-    },
-    setDirection: (state, action: PayloadAction<ClueDirection>) => {
-      state.direction = action.payload;
+    setSelection: (state, action: PayloadAction<Partial<SelectionState>>) => {
+      Object.assign(state, action.payload);
     },
   },
 });
 
-export const {
-  setSelectedCell,
-  setSelectedAnswer,
-  setSelectedAnswerNum,
-  setSelectedAnswerKey,
-  setDirection,
-} = selectionSlice.actions;
+export const { setSelection } = selectionSlice.actions;
 export default selectionSlice.reducer;

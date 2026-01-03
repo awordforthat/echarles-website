@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { ClueDirection } from './types';
 import { useAppSelector } from './hooks';
 
@@ -19,64 +19,77 @@ interface IClueProps {
   text: string;
   selectedPrimary: boolean;
   selectedSecondary: boolean;
+  // eslint-disable-next-line no-unused-vars
+  onClick: (rowNum: number, colNum: number) => void;
 }
-function Clue(props: IClueProps) {
+const Clue = React.memo(function Clue(props: IClueProps) {
   const {
     number,
-    direction,
     rowNum,
     colNum,
     text,
     selectedPrimary,
     selectedSecondary,
+    onClick,
   } = props;
-  const { updateAnswer } = useSelectionUpdates();
+
+  const handleClick = React.useCallback(() => {
+    onClick(rowNum, colNum);
+  }, [onClick, rowNum, colNum]);
+
   const clueClasses = classNames(styles.clue, {
     [styles.selectedPrimary]: selectedPrimary,
     [styles.selectedSeconary]: selectedSecondary,
   });
+
   return (
-    <div
-      className={clueClasses}
-      onClick={() =>
-        updateAnswer({ direction, cell: { row: rowNum, col: colNum } })
-      }
-    >
+    <div className={clueClasses} onClick={handleClick}>
       <div className={styles.numberContainer}>{number}</div>
       <div className={styles.textContainer}>{text}</div>
     </div>
   );
-}
+});
 
-export function ClueContainer(props: IClueContainerProps) {
-  const { direction } = props;
-  const clues = useAppSelector((state) => state.solution.dataByClue[direction]);
-  const selectedClue = useAppSelector((state) => state.selection);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+export function ClueContainer({ direction }: IClueContainerProps) {
+  const clues = useAppSelector((s) => s.solution.dataByClue[direction]);
+
+  const selectedAnswerKey = useAppSelector((s) => s.selection.answerKey);
+  const selectedDirection = useAppSelector((s) => s.selection.direction);
+  const selectedAnswerNum = useAppSelector((s) => s.selection.answerNum);
+
   const selectedRef = useRef<HTMLDivElement | null>(null);
-  const selections = useAppSelector((state) => state.selection);
 
   useEffect(() => {
-    if (!selectedRef.current) return;
-    if (!selections) return;
-
-    selectedRef.current.scrollIntoView({
+    if (selectedDirection !== direction) return;
+    const el = selectedRef.current;
+    if (!el) return;
+    el.scrollIntoView({
       block: 'nearest',
       inline: 'nearest',
-      behavior: 'smooth',
+      behavior: 'auto',
     });
-  }, [selections]);
+  }, [selectedAnswerKey, selectedDirection, direction]);
+
+  const { updateAnswer } = useSelectionUpdates();
+
+  const handleClueClick = useCallback(
+    (rowNum: number, colNum: number) => {
+      updateAnswer({ direction, cell: { row: rowNum, col: colNum } });
+    },
+    [updateAnswer, direction]
+  );
 
   return (
-    <div className={styles.clueContainer} ref={containerRef}>
+    <div className={styles.clueContainer}>
       <div className={styles.title}>{direction}</div>
       <div className={styles.scrollable}>
         {clues.map((c) => {
           const [rowNum, colNum] = keyToRowCol(c.key);
           const id = `clue-${c.key}-${direction}`;
+
           const isSelected =
-            c.key === selections.answerKey &&
-            direction === selections.direction;
+            c.key === selectedAnswerKey && direction === selectedDirection;
+
           return (
             <div key={id} ref={isSelected ? selectedRef : null}>
               <Clue
@@ -86,11 +99,11 @@ export function ClueContainer(props: IClueContainerProps) {
                 colNum={colNum}
                 text={c.clue}
                 selectedPrimary={
-                  c.number === selectedClue.answerNum &&
-                  direction == selectedClue.direction
+                  c.number === selectedAnswerNum &&
+                  direction === selectedDirection
                 }
-                // TODO: precalculate cross clue
-                selectedSecondary={false && direction != selectedClue.direction}
+                selectedSecondary={false}
+                onClick={handleClueClick}
               />
             </div>
           );
