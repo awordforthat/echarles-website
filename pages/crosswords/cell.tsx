@@ -6,16 +6,16 @@ import { answerContainsCell, rowColToKey } from './utils';
 import { ICell } from './types';
 import { useSelectionUpdates } from './useSelectionUpdates';
 
-export function Cell(props: ICell) {
+function CellImpl(props: ICell) {
   const { row, col, answerContent, uiNum } = props;
   const cellKey = rowColToKey(row, col);
   const selectedAnswerKey = useAppSelector(
     (state) => state.selection.answerKey
   );
 
-  const selectedCell = useAppSelector((state) => {
-    return { row: state.selection.row, col: state.selection.col };
-  });
+  const selectedRow = useAppSelector((state) => state.selection.row);
+  const selectedCol = useAppSelector((state) => state.selection.col);
+  const isSelected = selectedRow === row && selectedCol === col;
   const direction = useAppSelector((state) => state.selection.direction);
   const dataByCell = useAppSelector((state) => state.solution.dataByCell);
   const userContent = useAppSelector(
@@ -35,7 +35,7 @@ export function Cell(props: ICell) {
         col,
         direction
       ),
-    [styles.selected]: selectedCell.row == row && selectedCell.col == col,
+    [styles.selected]: isSelected,
     [styles.black]: answerContent == null,
     [styles.wrong]: !isCorrect,
   });
@@ -44,7 +44,7 @@ export function Cell(props: ICell) {
     <div
       className={cellClasses}
       onClick={() => {
-        if (selectedCell.row === row && selectedCell.col === col) {
+        if (selectedRow === row && selectedCol === col) {
           // Clicked on same cell, change direction but not cell selection.
           toggleDirection();
           return;
@@ -57,3 +57,5 @@ export function Cell(props: ICell) {
     </div>
   );
 }
+
+export const Cell = React.memo(CellImpl);

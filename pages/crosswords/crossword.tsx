@@ -207,7 +207,7 @@ export function Crossword() {
   );
 
   // TODO: extract to separate component.
-  const renderGrid = React.useCallback(() => {
+  const grid = React.useMemo(() => {
     const rows = [];
     for (let row = 0; row < crosswordDef.gridSize; row++) {
       const currentRow = [];
@@ -217,17 +217,17 @@ export function Crossword() {
 
         if (cellAnswer?.answerContent == null) {
           currentRow.push(<Cell key={key} row={row} col={col} />);
-          continue;
+        } else {
+          currentRow.push(
+            <Cell
+              key={key}
+              row={row}
+              col={col}
+              uiNum={cellAnswer.uiNum}
+              answerContent={cellAnswer.answerContent}
+            />
+          );
         }
-        currentRow.push(
-          <Cell
-            key={key}
-            row={row}
-            col={col}
-            uiNum={cellAnswer.uiNum}
-            answerContent={cellAnswer?.answerContent}
-          />
-        );
       }
       rows.push(
         <div key={`row-${row}`} className={styles.row}>
@@ -237,6 +237,7 @@ export function Crossword() {
     }
     return rows;
   }, [crosswordDef.grid, crosswordDef.gridSize]);
+
   return (
     <div className={styles.page}>
       <div className={styles.titleContainer}>
@@ -257,7 +258,7 @@ export function Crossword() {
             className={styles.crossword}
             onKeyDown={handleKeyDown}
           >
-            {renderGrid()}
+            {grid}
             {showCompletionModal && (
               <CompletionModal
                 onClose={() => {
